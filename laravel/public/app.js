@@ -62,6 +62,7 @@ const app = {
     await this.fetchProducts();
 
     this.renderStore();
+    this.updateHomeSmartCalc();
     this.setupEventListeners();
   },
 
@@ -3501,6 +3502,95 @@ const app = {
       if (label) label.innerText = targetSize;
     }
     this.showToast(`تم تطبيق المقاس الذكي الموصى به (${targetSize}) بنجاح! 🪄`, 'success');
+  },
+
+  // HOMEPAGE SMART AI CALCULATOR SHOWCASE
+  homeSmartFit: 'regular',
+  homeCalculatedSize: 'L',
+
+  updateHomeSmartCalc: function() {
+    const hInput = document.getElementById('home-smart-height');
+    const wInput = document.getElementById('home-smart-weight');
+    if (!hInput || !wInput) return;
+
+    const h = parseInt(hInput.value);
+    const w = parseInt(wInput.value);
+
+    const hVal = document.getElementById('home-smart-height-val');
+    const wVal = document.getElementById('home-smart-weight-val');
+    if (hVal) hVal.innerText = h;
+    if (wVal) wVal.innerText = w;
+
+    const fit = this.homeSmartFit || 'regular';
+    const bmi = w / ((h / 100) * (h / 100));
+
+    let recSize = 'L';
+    let statusText = 'مقاس مثالي وقوام متناسق';
+    let adviceText = '';
+    let confidence = 98;
+
+    if (fit === 'slim') {
+      if (bmi < 21.0) { recSize = 'S'; statusText = 'قصة ضيقة ومجسمة بدقة'; }
+      else if (bmi < 25.0) { recSize = 'M'; statusText = 'قوام رياضي متناسق'; }
+      else if (bmi < 28.5) { recSize = 'L'; statusText = 'مقاس محكم وأنيق'; }
+      else if (bmi < 32.5) { recSize = 'XL'; statusText = 'قصة عصرية ومريحة'; }
+      else { recSize = 'XXL'; statusText = 'مقاس واسع ومحدد'; }
+      adviceText = `بناءً على طول ${h} سم ووزن ${w} كجم بقصة مجسمة (Slim Fit)، مقاس ${recSize} يعطيك مظهراً أنيقاً ومحدداً عند الخصر والأكتاف.`;
+    } else if (fit === 'relaxed') {
+      if (bmi < 20.0) { recSize = 'M'; statusText = 'قصة فضفاضة عصرية'; }
+      else if (bmi < 24.0) { recSize = 'L'; statusText = 'راحة وانسيابية تامة'; }
+      else if (bmi < 28.0) { recSize = 'XL'; statusText = 'قصة أوفرسايزد راقية'; }
+      else if (bmi < 32.0) { recSize = 'XXL'; statusText = 'قصة رحبة وأقصى راحة'; }
+      else { recSize = 'XXL'; statusText = 'راحة وأقصى اتساع'; }
+      adviceText = `بناءً على طول ${h} سم ووزن ${w} كجم بقصة فضفاضة (Relaxed / Oversized)، مقاس ${recSize} يمنحك راحة قصوى وحرية حركة كاملة.`;
+    } else {
+      // Regular Fit
+      if (bmi < 20.5) { recSize = 'S'; statusText = 'مقاس كلاسيكي خفيف'; }
+      else if (bmi < 24.8) { recSize = 'M'; statusText = 'تطابق كلاسيكي متوازن'; }
+      else if (bmi < 28.5) { recSize = 'L'; statusText = 'مقاس مثالي وقوام متناسق'; }
+      else if (bmi < 32.5) { recSize = 'XL'; statusText = 'مقاس متناسق وفسيح'; }
+      else { recSize = 'XXL'; statusText = 'مقاس رحب ومريح'; }
+      adviceText = `بناءً على طول ${h} سم ووزن ${w} كجم بقصة كلاسيكية (Regular Fit)، مقاس ${recSize} هو الخيار الذهبي لملاءمة الصدر والأكتاف.`;
+    }
+
+    this.homeCalculatedSize = recSize;
+
+    const sizeDisplay = document.getElementById('home-smart-size-display');
+    const btnSize = document.getElementById('home-smart-btn-size');
+    const fitStatus = document.getElementById('home-smart-fit-status');
+    const advice = document.getElementById('home-smart-advice');
+    const confFill = document.getElementById('home-smart-confidence-fill');
+
+    if (sizeDisplay) sizeDisplay.innerText = recSize;
+    if (btnSize) btnSize.innerText = recSize;
+    if (fitStatus) fitStatus.innerText = statusText;
+    if (advice) advice.innerText = adviceText;
+    if (confFill) confFill.style.width = `${confidence}%`;
+  },
+
+  setHomeFit: function(fit, btn) {
+    this.homeSmartFit = fit;
+    document.querySelectorAll('.fit-toggle-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    this.updateHomeSmartCalc();
+  },
+
+  filterProductsBySmartCalc: function() {
+    const size = this.homeCalculatedSize || 'L';
+    const sizeSelect = document.getElementById('filter-size');
+    if (sizeSelect) {
+      sizeSelect.value = size;
+      this.handleSizeFilter(size);
+    } else {
+      this.filterSize = size;
+      this.renderProducts();
+    }
+
+    const targetSection = document.getElementById('products-section');
+    if (targetSection) {
+      targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    this.showToast(`✨ تم تصفية الملابس المتوفرة بمقاسك الذكي الموصى به (${size})!`, 'success');
   },
 
   // SHOP THE LOOK / OUTFIT BUNDLE COORDINATOR

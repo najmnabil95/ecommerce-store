@@ -90,6 +90,10 @@
           </div>
         </div>
 
+        <button class="action-btn" onclick="app.openSmartSizeModal()" title="الحاسبة الذكية للمقاسات" style="color: #8b5cf6;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span class="action-label">الحاسبة الذكية</span>
+        </button>
         <button class="action-btn" onclick="app.showTrackingModal()">
           <i class="fa-solid fa-truck-ramp-box"></i>
           <span class="action-label">تتبع الطلب</span>
@@ -120,6 +124,9 @@
           <p class="hero-desc">تشكيلة استثنائية من بدلات التوكسيدو المصممة من الصوف الإيطالي، الثياب الملكية المفصلة من قماش تويوبو الياباني الأصلي، والأزياء الشبابية الكاجوال العصرية مع ضمان الجودة 100%.</p>
           <div class="hero-actions">
             <a href="#products-section" class="btn btn-primary"><i class="fa-solid fa-shirt"></i> تصفح تشكيلة الملابس</a>
+            <button class="btn btn-outline" onclick="app.openSmartSizeModal()" style="border-color:#8b5cf6; color:inherit;">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i> الحاسبة الذكية للمقاسات
+            </button>
             <button class="btn btn-outline" onclick="app.openSizeGuideModal()"><i class="fa-solid fa-ruler-combined"></i> دليل المقاسات الشامل</button>
             <span class="hero-feature"><i class="fa-solid fa-truck-fast"></i> شحن سريع وضمان استرجاع 14 يوم</span>
           </div>
@@ -135,6 +142,101 @@
         </div>
         <div class="categories-pills" id="categories-container">
           <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SMART AI SIZE CALCULATOR SHOWCASE SECTION -->
+    <section class="smart-calculator-section" id="smart-calculator-section">
+      <div class="smart-calc-container">
+        <div class="smart-calc-wrapper">
+          <div class="smart-calc-header">
+            <span class="smart-badge-pill">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> ذكاء اصطناعي تفاعلي حصري
+            </span>
+            <h2>الحاسبة الذكية لمقاسات الملابس والأزياء</h2>
+            <p>لا داعي للحيرة في اختيار مقاسك! حرّك مؤشرات الطول والوزن وحدد نوع القصة التي تفضلها، وسيقوم محرك القياس الذكي بتحديد مقاسك المثالي وعرض التشكيلات المناسبة لك فوراً.</p>
+          </div>
+
+          <div class="smart-calc-grid">
+            <!-- Left Side: Interactive Sliders & Fit Choice -->
+            <div class="smart-calc-inputs">
+              <!-- Height Slider Card -->
+              <div class="smart-slider-card">
+                <div class="slider-top-row">
+                  <label><i class="fa-solid fa-arrows-up-down" style="color:var(--primary);"></i> الطول التقريبي</label>
+                  <span class="slider-value-badge"><span id="home-smart-height-val">175</span> سم</span>
+                </div>
+                <input type="range" class="smart-range-input" id="home-smart-height" min="145" max="205" value="175" oninput="app.updateHomeSmartCalc()">
+                <div class="slider-ticks">
+                  <span>145 سم (قصير)</span>
+                  <span>175 سم (متوسط)</span>
+                  <span>205 سم (فارع)</span>
+                </div>
+              </div>
+
+              <!-- Weight Slider Card -->
+              <div class="smart-slider-card">
+                <div class="slider-top-row">
+                  <label><i class="fa-solid fa-weight-scale" style="color:#a855f7;"></i> الوزن التقريبي</label>
+                  <span class="slider-value-badge" style="background:#7c3aed;"><span id="home-smart-weight-val">74</span> كجم</span>
+                </div>
+                <input type="range" class="smart-range-input" id="home-smart-weight" min="45" max="135" value="74" oninput="app.updateHomeSmartCalc()">
+                <div class="slider-ticks">
+                  <span>45 كجم (نحيف)</span>
+                  <span>75 كجم (مثالي)</span>
+                  <span>135 كجم (ممتلئ)</span>
+                </div>
+              </div>
+
+              <!-- Fit Preference Toggle -->
+              <div class="fit-preference-group">
+                <label><i class="fa-solid fa-shirt"></i> أسلوب القصة المفضل لديك:</label>
+                <div class="fit-btn-row">
+                  <button type="button" class="fit-toggle-btn" data-fit="slim" onclick="app.setHomeFit('slim', this)">
+                    <i class="fa-solid fa-person"></i>
+                    <span>ممشوق ومجسم</span>
+                    <span class="fit-sub">Slim Fit</span>
+                  </button>
+                  <button type="button" class="fit-toggle-btn active" data-fit="regular" onclick="app.setHomeFit('regular', this)">
+                    <i class="fa-solid fa-person-walking"></i>
+                    <span>كلاسيكي مريح</span>
+                    <span class="fit-sub">Regular Fit</span>
+                  </button>
+                  <button type="button" class="fit-toggle-btn" data-fit="relaxed" onclick="app.setHomeFit('relaxed', this)">
+                    <i class="fa-solid fa-child-reaching"></i>
+                    <span>فضفاض وواسع</span>
+                    <span class="fit-sub">Oversized</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Realtime Size Result Card -->
+            <div class="smart-calc-result-card">
+              <span class="calc-result-tag"><i class="fa-solid fa-circle-check"></i> النتيجة المحسوبة بدقة فورية</span>
+              <div class="calc-big-size" id="home-smart-size-display">L</div>
+              <div class="calc-result-status" id="home-smart-fit-status">مقاس مثالي وقوام متناسق</div>
+              
+              <div class="calc-confidence-bar" title="دقة التوصية: 98%">
+                <div class="calc-confidence-fill" id="home-smart-confidence-fill"></div>
+              </div>
+              <span style="font-size:0.75rem; color:#10b981; font-weight:800;"><i class="fa-solid fa-sparkles"></i> نسبة تطابق المقاس: 98%</span>
+
+              <p class="calc-advice-note" id="home-smart-advice">
+                بناءً على طول 175 سم ووزن 74 كجم بقصة كلاسيكية، هذا المقاس يمنحك راحة قصوى على الصدر والكتفين.
+              </p>
+
+              <div class="smart-calc-actions">
+                <button type="button" class="btn-smart-filter" onclick="app.filterProductsBySmartCalc()">
+                  <i class="fa-solid fa-filter"></i> تصفح المنتجات المتوفرة بمقاس (<span id="home-smart-btn-size">L</span>)
+                </button>
+                <button type="button" class="btn-smart-modal-trigger" onclick="app.openSmartSizeModal()">
+                  <i class="fa-solid fa-sliders"></i> فتح الحاسبة المتقدمة لجميع التشكيلات
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -2620,6 +2722,12 @@
       </div>
     </div>
   </div>
+
+  <!-- Floating Smart Calculator Button (FAB) -->
+  <a href="javascript:void(0)" class="smart-calc-fab" onclick="app.openSmartSizeModal()" title="حاسبة المقاسات الذكية الفورية">
+    <i class="fa-solid fa-wand-magic-sparkles"></i>
+    <span>الحاسبة الذكية 📏</span>
+  </a>
 
   <!-- Toast Notification System Container -->
   <div class="toast-container" id="toast-container"></div>
