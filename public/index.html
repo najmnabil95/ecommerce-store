@@ -1,0 +1,2629 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>متجر النخبة | المتجر الإلكتروني الشامل</title>
+  <!-- Google Fonts: Cairo & Tajawal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container announcement-content">
+      <span id="top-announcement-text"><i class="fa-solid fa-truck-fast"></i> شحن مجاني للطلبات الأكثر من $150 | كود الخصم: <strong>WELCOME10</strong></span>
+      <div class="announcement-links" style="display:flex; gap:16px; align-items:center;">
+        <button id="theme-toggle-btn" class="btn-text" onclick="app.toggleTheme()">
+          <i class="fa-solid fa-moon"></i> <span id="theme-text">الوضع الداكن</span>
+        </button>
+        <button id="toggle-admin-btn" class="btn-text" onclick="app.handleAdminBtnClick()">
+          <i class="fa-solid fa-user-shield"></i> لوحة الإدارة
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <header class="main-header">
+    <div class="container header-content">
+      <!-- Store Brand -->
+      <a href="#" class="brand-logo" onclick="app.showStoreView(); return false;">
+        <div class="logo-icon"><i class="fa-solid fa-bag-shopping"></i></div>
+        <div class="logo-text">
+          <span class="brand-name">متجر النخبة</span>
+          <span class="brand-tagline">ELITE STORE</span>
+        </div>
+      </a>
+
+      <!-- Search Bar -->
+      <div class="header-search">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="ابحث عن المنتجات، الساعات، العطور..." oninput="app.handleSearch(this.value)">
+        <button class="clear-search-btn" id="clear-search" onclick="app.clearSearch()" style="display:none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="header-actions">
+        <!-- User Account Button & Dropdown -->
+        <div class="user-menu-wrapper" style="position: relative;">
+          <button class="action-btn" id="user-menu-btn" onclick="app.handleUserBtnClick()">
+            <i class="fa-solid fa-user"></i>
+            <span class="action-label" id="user-label">دخول</span>
+          </button>
+          <div class="user-menu-dropdown" id="user-dropdown">
+            <div class="user-dropdown-header">
+              <span id="user-dropdown-role">عميل المتجر</span>
+              <strong id="user-dropdown-name">زائر</strong>
+            </div>
+            <button class="user-dropdown-item" onclick="app.showCustomerOrders()">
+              <i class="fa-solid fa-box-archive"></i> طلباتي السابقة
+            </button>
+            <button class="user-dropdown-item logout" onclick="app.logoutUser()">
+              <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+            </button>
+          </div>
+        </div>
+
+        <!-- Notifications Hub Button & Dropdown -->
+        <div class="notif-wrapper" style="position: relative;">
+          <button class="action-btn" id="notif-btn" onclick="app.toggleNotifications()">
+            <i class="fa-solid fa-bell"></i>
+            <span class="action-label">التنبيهات</span>
+            <span class="badge-count" id="notif-badge">3</span>
+          </button>
+          <div class="notifications-dropdown" id="notifications-dropdown">
+            <div class="notif-header">
+              <strong><i class="fa-solid fa-bell"></i> مركز التنبيهات</strong>
+              <button class="btn-text" style="font-size:0.75rem; color:var(--primary); cursor:pointer;" onclick="app.markAllNotifsRead()">تحديد كمقروء</button>
+            </div>
+            <div class="notif-list" id="notif-list">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <button class="action-btn" onclick="app.showTrackingModal()">
+          <i class="fa-solid fa-truck-ramp-box"></i>
+          <span class="action-label">تتبع الطلب</span>
+        </button>
+        <button class="action-btn" onclick="app.showWishlistModal()">
+          <i class="fa-solid fa-heart"></i>
+          <span class="action-label">المفضلة</span>
+          <span class="badge-count" id="wishlist-badge">0</span>
+        </button>
+        <button class="action-btn" onclick="app.toggleCartDrawer()">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span class="action-label">السلة</span>
+          <span class="badge-count" id="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- STORE VIEW SECTION -->
+  <main id="store-view" class="view-section active">
+
+    <!-- Hero Banner Card -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-card fashion-hero-card">
+          <div class="hero-badge"><i class="fa-solid fa-crown"></i> دار الأزياء الفاخرة | صيف وخريف 2026</div>
+          <h1 class="hero-title">أناقة رجالية وشبابية لا تضاهى بأرقى الأقمشة العالمية</h1>
+          <p class="hero-desc">تشكيلة استثنائية من بدلات التوكسيدو المصممة من الصوف الإيطالي، الثياب الملكية المفصلة من قماش تويوبو الياباني الأصلي، والأزياء الشبابية الكاجوال العصرية مع ضمان الجودة 100%.</p>
+          <div class="hero-actions">
+            <a href="#products-section" class="btn btn-primary"><i class="fa-solid fa-shirt"></i> تصفح تشكيلة الملابس</a>
+            <button class="btn btn-outline" onclick="app.openSizeGuideModal()"><i class="fa-solid fa-ruler-combined"></i> دليل المقاسات الشامل</button>
+            <span class="hero-feature"><i class="fa-solid fa-truck-fast"></i> شحن سريع وضمان استرجاع 14 يوم</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Filter Bar -->
+    <section class="categories-section">
+      <div class="container">
+        <div class="section-header">
+          <h2><i class="fa-solid fa-layer-group"></i> تشكيلات الأزياء والملابس</h2>
+        </div>
+        <div class="categories-pills" id="categories-container">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Products Catalog -->
+    <section class="products-section" id="products-section">
+      <div class="container">
+        <!-- Controls Bar: Filter status & Sort -->
+        <div class="products-controls">
+          <div class="results-info">
+            <span id="products-count">عرض جميع المنتجات</span>
+          </div>
+          <div class="sort-controls" style="display:flex; gap:12px; align-items:center;">
+            <button class="btn btn-secondary" onclick="app.toggleAdvancedFilters()" style="padding:7px 14px; font-size:0.88rem;">
+              <i class="fa-solid fa-sliders"></i> فلترة الملابس والمقاسات
+            </button>
+            <label for="sort-select"><i class="fa-solid fa-arrow-down-short-wide"></i> ترتيب:</label>
+            <select id="sort-select" onchange="app.handleSortChange(this.value)">
+              <option value="default">الأحدث</option>
+              <option value="price-low">السعر: من الأقل للأعلى</option>
+              <option value="price-high">السعر: من الأعلى للأقل</option>
+              <option value="rating">الأعلى تقييماً</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Advanced Filters Panel -->
+        <div class="advanced-filters-panel" id="advanced-filters-panel">
+          <div class="filters-grid">
+            <!-- Filter by Size -->
+            <div class="filter-group">
+              <label><i class="fa-solid fa-ruler"></i> فلترة حسب المقاس</label>
+              <select id="filter-size" onchange="app.handleSizeFilter(this.value)">
+                <option value="all">جميع المقاسات</option>
+                <optgroup label="مقاسات الحروف (S - XXL)">
+                  <option value="S">S (سمول)</option>
+                  <option value="M">M (وسط)</option>
+                  <option value="L">L (كبير)</option>
+                  <option value="XL">XL (كبير جداً)</option>
+                  <option value="XXL">XXL (دبل إكس)</option>
+                </optgroup>
+                <optgroup label="مقاسات الثياب الرسمية (بالبوصة)">
+                  <option value="54">54 بوصة</option>
+                  <option value="56">56 بوصة</option>
+                  <option value="58">58 بوصة</option>
+                  <option value="60">60 بوصة</option>
+                  <option value="62">62 بوصة</option>
+                </optgroup>
+                <optgroup label="مقاسات البدلات الأوروبية (EU)">
+                  <option value="46">46 EU</option>
+                  <option value="48">48 EU</option>
+                  <option value="50">50 EU</option>
+                  <option value="52">52 EU</option>
+                  <option value="54">54 EU</option>
+                  <option value="56">56 EU</option>
+                </optgroup>
+                <optgroup label="مقاسات الأحذية">
+                  <option value="40">40</option>
+                  <option value="41">41</option>
+                  <option value="42">42</option>
+                  <option value="43">43</option>
+                  <option value="44">44</option>
+                  <option value="45">45</option>
+                </optgroup>
+              </select>
+            </div>
+
+            <!-- Filter by Fit Type -->
+            <div class="filter-group">
+              <label><i class="fa-solid fa-scissors"></i> نوع القصة (Fit)</label>
+              <select id="filter-fit" onchange="app.handleFitFilter(this.value)">
+                <option value="all">كل القصات</option>
+                <option value="Slim Fit">Slim Fit (قصة ضيقة متناسقة)</option>
+                <option value="Modern Fit">Modern Fit (عصري متوازن)</option>
+                <option value="Regular Fit">Regular Fit (كلاسيكي مريح)</option>
+                <option value="Oversized">Oversized (شبابي واسع)</option>
+                <option value="Classic Cut">Classic Cut (تفصيل عربي أصيل)</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label><i class="fa-solid fa-tags"></i> أقصى سعر: <span id="price-range-display" style="color:var(--primary); font-weight:800;">$1000</span></label>
+              <div class="filter-slider-wrap">
+                <input type="range" id="price-range-slider" min="20" max="1000" step="10" value="1000" oninput="app.handlePriceSlider(this.value)" style="width:100%; accent-color:var(--primary);">
+                <div class="filter-range-val">
+                  <span>$20</span>
+                  <span>$1000</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label><i class="fa-solid fa-star"></i> التقييم الأدنى</label>
+              <select id="filter-rating" onchange="app.handleRatingFilter(this.value)">
+                <option value="0">الكل (جميع التقييمات)</option>
+                <option value="4.8">⭐⭐⭐⭐⭐ (4.8 فأعلى)</option>
+                <option value="4.5">⭐⭐⭐⭐ (4.5 فأعلى)</option>
+                <option value="4.0">⭐⭐⭐⭐ (4.0 فأعلى)</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label class="filter-check-wrap">
+                <input type="checkbox" id="filter-instock" onchange="app.handleInStockFilter(this.checked)">
+                <span><i class="fa-solid fa-boxes-stacked"></i> المتوفر في المخزون فقط</span>
+              </label>
+            </div>
+
+            <!-- Filter by Visual Color Swatches -->
+            <div class="filter-group">
+              <label><i class="fa-solid fa-palette"></i> تصفية حسب اللون</label>
+              <div class="filter-color-palette" id="filter-color-palette">
+                <button type="button" class="color-filter-chip active" data-color="all" onclick="app.handleColorFilter('all', this)" title="جميع الألوان">الكل</button>
+                <button type="button" class="color-filter-chip" data-color="كحلي" onclick="app.handleColorFilter('كحلي', this)" style="--chip-bg:#1e3a8a;" title="كحلي"></button>
+                <button type="button" class="color-filter-chip" data-color="أسود" onclick="app.handleColorFilter('أسود', this)" style="--chip-bg:#111827;" title="أسود"></button>
+                <button type="button" class="color-filter-chip" data-color="أبيض" onclick="app.handleColorFilter('أبيض', this)" style="--chip-bg:#f8fafc; border:1px solid #cbd5e1;" title="أبيض"></button>
+                <button type="button" class="color-filter-chip" data-color="رمادي" onclick="app.handleColorFilter('رمادي', this)" style="--chip-bg:#64748b;" title="رمادي"></button>
+                <button type="button" class="color-filter-chip" data-color="بني" onclick="app.handleColorFilter('بني', this)" style="--chip-bg:#78350f;" title="بني"></button>
+                <button type="button" class="color-filter-chip" data-color="بيج" onclick="app.handleColorFilter('بيج', this)" style="--chip-bg:#d97706;" title="بيج / خردلي"></button>
+                <button type="button" class="color-filter-chip" data-color="زيتي" onclick="app.handleColorFilter('زيتي', this)" style="--chip-bg:#14532d;" title="زيتي / أخضر"></button>
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <button class="btn btn-secondary btn-block" onclick="app.resetAdvancedFilters()">
+                <i class="fa-solid fa-rotate-left"></i> تفريغ الفلاتر
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid" id="products-grid">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SHOP THE LOOK / OUTFITS COORDINATION SECTION (نسّق إطلالتك) -->
+    <section class="shop-the-look-section" id="shop-the-look">
+      <div class="container">
+        <div class="outfits-header">
+          <div class="outfits-badge"><i class="fa-solid fa-sparkles"></i> تنسيقات خبراء الموضة</div>
+          <h2 class="outfits-title">نسّق إطلالتك الكاملة بخصم 15%</h2>
+          <p class="outfits-subtitle">إطلالات متكاملة منسّقة بعناية فائقة لتمنحك هيبة الحضور وأناقة المظهر بأفضل سعر</p>
+        </div>
+
+        <div class="outfits-grid">
+          <!-- Look 1: Royal Tuxedo -->
+          <div class="outfit-card">
+            <div class="outfit-hero-banner" style="background-image: url('https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=800&q=80');">
+              <div class="outfit-hero-overlay"></div>
+              <div class="outfit-hero-meta">
+                <span class="outfit-tag">رسمي فاخر</span>
+                <h3 class="outfit-hero-title">إطلالة السمو الملكي الإيطالية</h3>
+              </div>
+            </div>
+            <div class="outfit-body">
+              <div class="outfit-items-list">
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="بدلة">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">بدلة إيطالية سليم فيت كحلية</div>
+                    <div class="outfit-item-selects">
+                      <select id="look1-size-1">
+                        <option value="48 EU">مقاس: 48 EU</option>
+                        <option value="50 EU" selected>مقاس: 50 EU</option>
+                        <option value="52 EU">مقاس: 52 EU</option>
+                        <option value="54 EU">مقاس: 54 EU</option>
+                      </select>
+                      <span class="outfit-item-price">$480</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="قميص">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">قميص أكسفورد ناصع البياض قطن 100%</div>
+                    <div class="outfit-item-selects">
+                      <select id="look1-size-2">
+                        <option value="M">مقاس: M</option>
+                        <option value="L" selected>مقاس: L</option>
+                        <option value="XL">مقاس: XL</option>
+                      </select>
+                      <span class="outfit-item-price">$110</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="حذاء">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">حذاء أوكسفورد إيطالي جلد طبيعي</div>
+                    <div class="outfit-item-selects">
+                      <select id="look1-size-3">
+                        <option value="41">مقاس: 41</option>
+                        <option value="42" selected>مقاس: 42</option>
+                        <option value="43">مقاس: 43</option>
+                        <option value="44">مقاس: 44</option>
+                      </select>
+                      <span class="outfit-item-price">$260</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="outfit-pricing-bar">
+                <div>
+                  <span class="bundle-savings-badge">وفر $127</span>
+                  <div style="font-size:0.75rem; color:var(--text-light); margin-top:2px;">عرض الباقة المنسقة</div>
+                </div>
+                <div style="text-align:left;">
+                  <span class="outfit-original-price">$850.00</span>
+                  <span class="outfit-total-price">$723.00</span>
+                </div>
+              </div>
+              <button class="btn-add-outfit" onclick="app.addOutfitBundle('royal')">
+                <i class="fa-solid fa-cart-arrow-down"></i> أضف الإطلالة بالكامل للسلة
+              </button>
+            </div>
+          </div>
+
+          <!-- Look 2: Arabian Heritage -->
+          <div class="outfit-card">
+            <div class="outfit-hero-banner" style="background-image: url('https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80');">
+              <div class="outfit-hero-overlay"></div>
+              <div class="outfit-hero-meta">
+                <span class="outfit-tag">أصالة وتراث</span>
+                <h3 class="outfit-hero-title">إطلالة الأصالة والأناقة العربية</h3>
+              </div>
+            </div>
+            <div class="outfit-body">
+              <div class="outfit-items-list">
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="ثوب">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">ثوب النخبة الملكي قطن مصري فاخر</div>
+                    <div class="outfit-item-selects">
+                      <select id="look2-size-1">
+                        <option value="56">مقاس: 56 بوصة</option>
+                        <option value="58" selected>مقاس: 58 بوصة</option>
+                        <option value="60">مقاس: 60 بوصة</option>
+                      </select>
+                      <span class="outfit-item-price">$190</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="شماغ">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">ساعة أوتوماتيكية كلاسيكية بسوار بني</div>
+                    <div class="outfit-item-selects">
+                      <select id="look2-size-2">
+                        <option value="قياسي">مقاس: 42 مم قياسي</option>
+                      </select>
+                      <span class="outfit-item-price">$350</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="عطر">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">أزرار أكمام ملكية مطلية بالذهب عيار 18</div>
+                    <div class="outfit-item-selects">
+                      <select id="look2-size-3">
+                        <option value="قياسي">مقاس: قياسي</option>
+                      </select>
+                      <span class="outfit-item-price">$130</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="outfit-pricing-bar">
+                <div>
+                  <span class="bundle-savings-badge">وفر $100</span>
+                  <div style="font-size:0.75rem; color:var(--text-light); margin-top:2px;">عرض الباقة المنسقة</div>
+                </div>
+                <div style="text-align:left;">
+                  <span class="outfit-original-price">$670.00</span>
+                  <span class="outfit-total-price">$570.00</span>
+                </div>
+              </div>
+              <button class="btn-add-outfit" onclick="app.addOutfitBundle('heritage')">
+                <i class="fa-solid fa-cart-arrow-down"></i> أضف الإطلالة بالكامل للسلة
+              </button>
+            </div>
+          </div>
+
+          <!-- Look 3: Modern Streetwear -->
+          <div class="outfit-card">
+            <div class="outfit-hero-banner" style="background-image: url('https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=800&q=80');">
+              <div class="outfit-hero-overlay"></div>
+              <div class="outfit-hero-meta">
+                <span class="outfit-tag">ستريت وير عصري</span>
+                <h3 class="outfit-hero-title">إطلالة الشارع العصرية المريحة</h3>
+              </div>
+            </div>
+            <div class="outfit-body">
+              <div class="outfit-items-list">
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="هودي">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">هودي أوفرسايز قطن ثقيل 450 GSM</div>
+                    <div class="outfit-item-selects">
+                      <select id="look3-size-1">
+                        <option value="M">مقاس: M</option>
+                        <option value="L" selected>مقاس: L</option>
+                        <option value="XL">مقاس: XL</option>
+                      </select>
+                      <span class="outfit-item-price">$95</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="تيشرت">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">تيشيرت بيسك قطن مصري مشط الملمس</div>
+                    <div class="outfit-item-selects">
+                      <select id="look3-size-2">
+                        <option value="M">مقاس: M</option>
+                        <option value="L" selected>مقاس: L</option>
+                        <option value="XL">مقاس: XL</option>
+                      </select>
+                      <span class="outfit-item-price">$45</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="outfit-item-row">
+                  <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=400&q=80" class="outfit-item-img" alt="جاكيت">
+                  <div class="outfit-item-details">
+                    <div class="outfit-item-name">جاكيت جلد طبيعي رايدر بايكر أسود</div>
+                    <div class="outfit-item-selects">
+                      <select id="look3-size-3">
+                        <option value="M">مقاس: M</option>
+                        <option value="L" selected>مقاس: L</option>
+                        <option value="XL">مقاس: XL</option>
+                      </select>
+                      <span class="outfit-item-price">$380</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="outfit-pricing-bar">
+                <div>
+                  <span class="bundle-savings-badge">وفر $78</span>
+                  <div style="font-size:0.75rem; color:var(--text-light); margin-top:2px;">عرض الباقة المنسقة</div>
+                </div>
+                <div style="text-align:left;">
+                  <span class="outfit-original-price">$520.00</span>
+                  <span class="outfit-total-price">$442.00</span>
+                </div>
+              </div>
+              <button class="btn-add-outfit" onclick="app.addOutfitBundle('streetwear')">
+                <i class="fa-solid fa-cart-arrow-down"></i> أضف الإطلالة بالكامل للسلة
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ADMIN VIEW SECTION (WORLD-CLASS ENTERPRISE SAAS DASHBOARD) -->
+  <main id="admin-view" class="view-section admin-portal-view" style="display: none;">
+    <div class="admin-portal-layout">
+      
+      <!-- Sleek Collapsible Admin Sidebar -->
+      <aside class="admin-sidebar" id="admin-sidebar">
+        <!-- Sidebar Brand & Identity -->
+        <div class="admin-sidebar-header">
+          <div class="admin-brand-icon">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div class="admin-brand-meta">
+            <div class="admin-brand-title">متجر النخبة</div>
+            <div class="admin-brand-badge">ADMIN PORTAL PRO <span class="live-dot"></span></div>
+          </div>
+          <button class="admin-sidebar-close-btn" onclick="app.toggleAdminSidebar(false)">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- MariaDB Health Chip -->
+        <div class="admin-db-status-chip">
+          <i class="fa-solid fa-server"></i>
+          <span>MariaDB 10.4 • Port 3306</span>
+          <span class="db-pulse-dot" title="متصل ونشط"></span>
+        </div>
+
+        <!-- Sidebar Navigation Groups -->
+        <div class="admin-sidebar-nav">
+          <div class="admin-nav-group-title">الرئيسية والتحليلات</div>
+          <button class="admin-nav-item active" onclick="app.switchAdminTab('overview-tab', this)">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>لوحة المؤشرات العامة</span>
+            <span class="nav-badge-pill" id="nav-badge-overview">مباشر</span>
+          </button>
+
+          <div class="admin-nav-group-title">التجارة والمبيعات</div>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('products-tab', this)">
+            <i class="fa-solid fa-boxes-stacked"></i>
+            <span>إدارة المنتجات والمخزون</span>
+            <span class="nav-badge-pill" id="nav-badge-products">15</span>
+          </button>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('orders-tab', this)">
+            <i class="fa-solid fa-receipt"></i>
+            <span>الطلبات الواردة والشحن</span>
+            <span class="nav-badge-pill bg-amber" id="nav-badge-pending">0</span>
+          </button>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('coupons-tab', this)">
+            <i class="fa-solid fa-tags"></i>
+            <span>الكوبونات والخصومات</span>
+          </button>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('categories-tab', this)">
+            <i class="fa-solid fa-shirt"></i>
+            <span>أقسام وتصنيفات المتجر</span>
+          </button>
+
+          <div class="admin-nav-group-title">علاقات العملاء (CRM)</div>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('users-tab', this)">
+            <i class="fa-solid fa-users"></i>
+            <span>العملاء والمستخدمين</span>
+          </button>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('reviews-tab', this)">
+            <i class="fa-solid fa-star"></i>
+            <span>التقييمات والمراجعات</span>
+          </button>
+
+          <div class="admin-nav-group-title">النظام والإعدادات</div>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('settings-tab', this)">
+            <i class="fa-solid fa-sliders"></i>
+            <span>إعدادات المتجر العامة</span>
+          </button>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('database-tab', this)">
+            <i class="fa-solid fa-database"></i>
+            <span>محرك MariaDB والنظام</span>
+          </button>
+        </div>
+
+        <!-- Sidebar User Footer -->
+        <div class="admin-sidebar-footer">
+          <div class="admin-user-profile-card">
+            <div class="admin-user-avatar">
+              <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="admin-user-info">
+              <strong id="admin-sidebar-user-name">مدير النظام العام</strong>
+              <span id="admin-sidebar-user-email">admin@elite.com</span>
+            </div>
+          </div>
+          <div class="admin-footer-actions">
+            <button class="btn btn-secondary btn-sm" onclick="app.showStoreView()" title="معاينة المتجر">
+              <i class="fa-solid fa-store"></i> المتجر
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="app.logoutUser()" title="تسجيل الخروج">
+              <i class="fa-solid fa-right-from-bracket"></i> خروج
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Overlay for mobile sidebar -->
+      <div class="admin-sidebar-overlay" onclick="app.toggleAdminSidebar(false)"></div>
+
+      <!-- Admin Main Wrapper (TopBar + Content Body) -->
+      <div class="admin-main-wrapper">
+        
+        <!-- Modern Command Topbar -->
+        <header class="admin-topbar">
+          <div class="admin-topbar-left">
+            <button class="admin-toggle-sidebar-btn" onclick="app.toggleAdminSidebar(true)" title="فتح القائمة">
+              <i class="fa-solid fa-bars-staggered"></i>
+            </button>
+            <div class="admin-breadcrumbs">
+              <span class="bc-root"><i class="fa-solid fa-gauge-high"></i> لوحة التحكم</span>
+              <span class="bc-divider">/</span>
+              <span class="bc-current" id="admin-current-breadcrumb">لوحة المؤشرات العامة</span>
+            </div>
+          </div>
+
+          <div class="admin-topbar-search" onclick="app.openCommandPalette()" style="cursor:pointer;" title="بحث فوري في كامل المتجر أو اضغط Ctrl + K">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span style="font-size:0.85rem; color:var(--text-light); flex:1;">بحث أو تنفيذ أمر سريع...</span>
+            <span class="command-kbd-badge">Ctrl K</span>
+          </div>
+
+          <div class="admin-topbar-right">
+            <div class="admin-live-clock" id="admin-live-clock">
+              <i class="fa-regular fa-clock"></i> <span id="admin-clock-text">--:--</span>
+            </div>
+            <button class="admin-top-action-btn" onclick="app.refreshAdminDashboard()" title="تحديث حي للبيانات">
+              <i class="fa-solid fa-arrows-rotate" id="admin-refresh-icon"></i>
+            </button>
+            <button class="admin-top-action-btn" onclick="app.toggleTheme()" title="تبديل المظهر">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="app.openProductModal()">
+              <i class="fa-solid fa-plus"></i> قطعة جديدة
+            </button>
+            <button class="btn btn-success btn-sm" onclick="app.exportOrdersCSV()" title="تصدير تقرير الطلبات">
+              <i class="fa-solid fa-file-excel"></i> تصدير Excel
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="app.showStoreView()">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> المتجر
+            </button>
+          </div>
+        </header>
+
+        <!-- Admin Content Body -->
+        <div class="admin-content-body">
+          
+          <!-- TAB 1: EXECUTIVE DASHBOARD OVERVIEW -->
+          <div id="overview-tab" class="tab-content active">
+            <div class="tab-actions">
+              <div>
+                <h3><i class="fa-solid fa-chart-pie" style="color:var(--primary);"></i> لوحة المؤشرات التنفيذية ونظرة عامة حية</h3>
+                <span style="font-size:0.85rem; color:var(--text-light);">مؤشرات الأداء اللحظية، حركة الإيرادات اليومية، وتوزيع طلبات العملاء</span>
+              </div>
+              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <div class="period-filter-group" id="stats-period-group">
+                  <button type="button" class="period-pill active" onclick="app.setStatsPeriod('7days', this)">آخر 7 أيام</button>
+                  <button type="button" class="period-pill" onclick="app.setStatsPeriod('today', this)">اليوم</button>
+                  <button type="button" class="period-pill" onclick="app.setStatsPeriod('month', this)">هذا الشهر</button>
+                  <button type="button" class="period-pill" onclick="app.setStatsPeriod('all', this)">كل الأوقات</button>
+                </div>
+                <span class="analytics-period-badge" id="admin-db-heartbeat-badge">
+                  <span class="pulse-dot"></span> MariaDB متصل وفعال
+                </span>
+              </div>
+            </div>
+
+            <!-- Enhanced KPI Stats Cards Row -->
+            <div class="stats-grid" id="stats-container">
+              <div class="stat-card">
+                <div class="stat-icon bg-green"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">إجمالي المبيعات المحققة</span>
+                  <div style="display:flex; align-items:baseline; gap:8px;">
+                    <h3 class="stat-value" id="stat-sales">$0.00</h3>
+                    <span class="stat-trend-tag positive"><i class="fa-solid fa-arrow-trend-up"></i> +14.8%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon bg-blue"><i class="fa-solid fa-boxes-packing"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">إجمالي الطلبات المسجلة</span>
+                  <div style="display:flex; align-items:baseline; gap:8px;">
+                    <h3 class="stat-value" id="stat-orders">0</h3>
+                    <span class="stat-trend-tag positive"><i class="fa-solid fa-arrow-trend-up"></i> +8.5%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon bg-purple"><i class="fa-solid fa-chart-pie"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">متوسط قيمة الطلب (AOV)</span>
+                  <h3 class="stat-value" id="stat-aov">$0.00</h3>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon bg-amber"><i class="fa-solid fa-clock"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">طلبات قيد المراجعة</span>
+                  <h3 class="stat-value" id="stat-pending">0</h3>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon bg-red"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div class="stat-info">
+                  <span class="stat-label">تنبيهات نقص المخزون</span>
+                  <h3 class="stat-value" id="stat-lowstock">0</h3>
+                </div>
+              </div>
+            </div>
+
+            <!-- VISUAL ANALYTICS & SALES TRENDS SECTION -->
+            <div class="admin-analytics-grid">
+              <!-- Chart 1: Interactive Sales Trend -->
+              <div class="analytics-card sales-chart-card">
+                <div class="analytics-card-header">
+                  <div>
+                    <h4><i class="fa-solid fa-chart-area" style="color:var(--primary);"></i> حركة الإيرادات والمبيعات اليومية (آخر 7 أيام)</h4>
+                    <span style="font-size:0.8rem; color:var(--text-light);">رصد يومي حي لحجم الطلبات وقيمة الإيرادات المحققة</span>
+                  </div>
+                  <span class="analytics-period-badge">آخر 7 أيام</span>
+                </div>
+                <div class="chart-container" id="admin-sales-chart">
+                  <!-- Dynamically populated SVG Chart -->
+                </div>
+              </div>
+
+              <!-- Widget 2: Order Status Distribution -->
+              <div class="analytics-card status-dist-card">
+                <div class="analytics-card-header">
+                  <div>
+                    <h4><i class="fa-solid fa-pie-chart" style="color:#8b5cf6;"></i> توزيع حالات الطلبات النشطة</h4>
+                    <span style="font-size:0.8rem; color:var(--text-light);">نسب إنجاز وتجهيز الطلبات في النظام</span>
+                  </div>
+                </div>
+                <div class="status-dist-list" id="admin-status-dist-list">
+                  <div class="status-dist-item">
+                    <div class="status-dist-meta">
+                      <span><i class="fa-solid fa-clock" style="color:#f59e0b;"></i> قيد المراجعة</span>
+                      <strong id="dist-count-pending">0 طلب (0%)</strong>
+                    </div>
+                    <div class="status-dist-track"><div class="status-dist-fill fill-pending" id="dist-bar-pending" style="width: 0%;"></div></div>
+                  </div>
+                  <div class="status-dist-item">
+                    <div class="status-dist-meta">
+                      <span><i class="fa-solid fa-boxes-packing" style="color:#3b82f6;"></i> جاري التجهيز والتغليف</span>
+                      <strong id="dist-count-processing">0 طلب (0%)</strong>
+                    </div>
+                    <div class="status-dist-track"><div class="status-dist-fill fill-processing" id="dist-bar-processing" style="width: 0%;"></div></div>
+                  </div>
+                  <div class="status-dist-item">
+                    <div class="status-dist-meta">
+                      <span><i class="fa-solid fa-truck-fast" style="color:#8b5cf6;"></i> تم الشحن مع شركة التوصيل</span>
+                      <strong id="dist-count-shipped">0 طلب (0%)</strong>
+                    </div>
+                    <div class="status-dist-track"><div class="status-dist-fill fill-shipped" id="dist-bar-shipped" style="width: 0%;"></div></div>
+                  </div>
+                  <div class="status-dist-item">
+                    <div class="status-dist-meta">
+                      <span><i class="fa-solid fa-circle-check" style="color:#10b981;"></i> تم التوصيل للعميل بنجاح</span>
+                      <strong id="dist-count-delivered">0 طلب (0%)</strong>
+                    </div>
+                    <div class="status-dist-track"><div class="status-dist-fill fill-delivered" id="dist-bar-delivered" style="width: 0%;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTIVITY & LAUNCHPAD GRID -->
+            <div class="admin-activity-grid">
+              <!-- Top Selling Garments -->
+              <div class="analytics-card top-products-card">
+                <div class="analytics-card-header">
+                  <div>
+                    <h4><i class="fa-solid fa-fire" style="color:#ef4444;"></i> أكثر قطع الأزياء طلباً ومبيعاً</h4>
+                    <span style="font-size:0.8rem; color:var(--text-light);">الأعلى مبيعاً وإيراداً مسجلاً في المتجر</span>
+                  </div>
+                </div>
+                <div class="top-products-list" id="admin-top-products-list">
+                  <!-- Dynamically populated top products -->
+                </div>
+              </div>
+
+              <!-- Quick Action Launchpad -->
+              <div class="analytics-card launchpad-container-card">
+                <div class="analytics-card-header">
+                  <div>
+                    <h4><i class="fa-solid fa-bolt" style="color:var(--accent);"></i> لوحة الإجراءات السريعة (Quick Launchpad)</h4>
+                    <span style="font-size:0.8rem; color:var(--text-light);">اختصارات لأهم المهام الإدارية اليومية</span>
+                  </div>
+                </div>
+                <div class="quick-launchpad-grid">
+                  <div class="launchpad-card" onclick="app.openProductModal()">
+                    <div class="launchpad-icon" style="background:rgba(37, 99, 235, 0.1); color:var(--primary);">
+                      <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="launchpad-info">
+                      <strong>إضافة منتج</strong>
+                      <span>أزياء أو قطعة جديدة</span>
+                    </div>
+                  </div>
+                  <div class="launchpad-card" onclick="app.openCouponModal()">
+                    <div class="launchpad-icon" style="background:rgba(16, 185, 129, 0.1); color:var(--success);">
+                      <i class="fa-solid fa-tag"></i>
+                    </div>
+                    <div class="launchpad-info">
+                      <strong>إنشاء كود خصم</strong>
+                      <span>كوبونات وحملات ترويج</span>
+                    </div>
+                  </div>
+                  <div class="launchpad-card" onclick="app.exportOrdersCSV()">
+                    <div class="launchpad-icon" style="background:rgba(124, 58, 237, 0.1); color:#7c3aed;">
+                      <i class="fa-solid fa-file-excel"></i>
+                    </div>
+                    <div class="launchpad-info">
+                      <strong>تصدير تقرير Excel</strong>
+                      <span>كشف كامل لجميع الطلبات</span>
+                    </div>
+                  </div>
+                  <div class="launchpad-card" onclick="app.switchAdminTab('database-tab')">
+                    <div class="launchpad-icon" style="background:rgba(245, 158, 11, 0.1); color:var(--accent);">
+                      <i class="fa-solid fa-database"></i>
+                    </div>
+                    <div class="launchpad-info">
+                      <strong>محرك MariaDB</strong>
+                      <span>نسخ احتياطي وبيانات</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Incoming Orders Table Snapshot -->
+            <div class="analytics-card" style="margin-top: 6px;">
+              <div class="analytics-card-header">
+                <div>
+                  <h4><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> أحدث الطلبات الواردة للمتجر</h4>
+                  <span style="font-size:0.8rem; color:var(--text-light);">متابعة فورية للطلبات الأخيرة والتحقق من تفاصيلها</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="app.switchAdminTab('orders-tab')">
+                  عرض كافة الطلبات <i class="fa-solid fa-arrow-left"></i>
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>رقم الطلب</th>
+                      <th>العميل</th>
+                      <th>المدينة</th>
+                      <th>المبلغ الإجمالي</th>
+                      <th>طريقة الدفع</th>
+                      <th>الحالة</th>
+                      <th>التاريخ</th>
+                      <th>الإجراء</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-recent-orders-body">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tab 2: Products Management -->
+          <div id="products-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <div>
+            <h3><i class="fa-solid fa-boxes-stacked"></i> قائمة المنتجات وإدارة المخزون الفوري</h3>
+            <span style="font-size:0.85rem; color:var(--text-light);">يمكنك تعديل كمية المخزون والسعر مباشرة من الجدول بنقرة واحدة أو تنفيذ عمليات بالجملة</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn btn-secondary btn-sm" onclick="app.exportProductsCSV()"><i class="fa-solid fa-file-csv"></i> تصدير المنتجات CSV</button>
+            <button class="btn btn-primary" onclick="app.openProductModal()"><i class="fa-solid fa-plus"></i> إضافة قطعة جديدة</button>
+          </div>
+        </div>
+
+        <!-- Products Quick Filter Bar -->
+        <div class="admin-filter-bar">
+          <div class="admin-search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="admin-product-search" placeholder="ابحث باسم المنتج أو خامة القماش..." oninput="app.filterAdminProductsTable()">
+          </div>
+          <div class="admin-filter-selects">
+            <select id="admin-product-cat-filter" onchange="app.filterAdminProductsTable()">
+              <option value="all">جميع الأقسام والتصنيفات</option>
+              <!-- Dynamically populated -->
+            </select>
+            <select id="admin-product-stock-filter" onchange="app.filterAdminProductsTable()">
+              <option value="all">حالة المخزون: الكل</option>
+              <option value="low">مخزون منخفض (<= 5 قطع)</option>
+              <option value="out">نفد من المخزون (0)</option>
+              <option value="available">متوفر في المخزون</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox" id="select-all-products" onchange="app.toggleSelectAllProducts(this.checked)" title="تحديد جميع المنتجات"></th>
+                <th>الصورة</th>
+                <th>اسم القطعة والخامة</th>
+                <th>القسم</th>
+                <th>السعر ($)</th>
+                <th>المقاسات المتوفرة</th>
+                <th style="min-width:140px;">المخزون السريع</th>
+                <th>الشارة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="admin-products-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Floating Bulk Action Bar for Products -->
+        <div class="admin-bulk-actions-bar" id="products-bulk-bar" style="display:none;">
+          <div class="bulk-meta">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>تم تحديد <strong id="products-bulk-count">0</strong> منتج</span>
+          </div>
+          <div class="bulk-buttons">
+            <button class="btn btn-secondary" onclick="app.openBulkStockModal()"><i class="fa-solid fa-boxes-stacked"></i> تعديل المخزون</button>
+            <button class="btn btn-secondary" onclick="app.openBulkPriceModal()"><i class="fa-solid fa-percent"></i> تعديل الأسعار %</button>
+            <button class="btn btn-secondary" onclick="app.openBulkCategoryModal()"><i class="fa-solid fa-folder-tree"></i> نقل لقسم</button>
+            <button class="btn btn-secondary" style="color:var(--danger); border-color:var(--danger);" onclick="app.handleBulkDeleteProducts()"><i class="fa-solid fa-trash"></i> حذف المحددة</button>
+            <button class="btn btn-secondary" onclick="app.clearProductSelection()"><i class="fa-solid fa-xmark"></i> إلغاء التحديد</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab 2: Orders Management -->
+      <div id="orders-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <div>
+            <h3><i class="fa-solid fa-receipt"></i> قائمة الطلبات والشحنات المسجلة</h3>
+            <span style="font-size:0.85rem; color:var(--text-light);">تحديث حالات الطلب، فحص المقاسات، محادثة العملاء واتساب، وطباعة الفواتير</span>
+          </div>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <button class="btn btn-success btn-sm" onclick="app.exportOrdersCSV()"><i class="fa-solid fa-file-excel"></i> تصدير Excel</button>
+            <button class="btn btn-secondary btn-sm" onclick="app.loadAdminOrders()"><i class="fa-solid fa-arrows-rotate"></i> تحديث الطلبات</button>
+          </div>
+        </div>
+
+        <!-- Orders Status Tabs Navigation -->
+        <div class="orders-status-tabs" id="orders-status-tabs">
+          <button type="button" class="order-status-tab-btn active" onclick="app.setOrderStatusFilter('all', this)">
+            <span>كافة الطلبات</span>
+            <span class="tab-count-badge" id="order-count-all">0</span>
+          </button>
+          <button type="button" class="order-status-tab-btn" onclick="app.setOrderStatusFilter('pending', this)">
+            <span><i class="fa-solid fa-clock" style="color:#f59e0b;"></i> قيد المراجعة</span>
+            <span class="tab-count-badge" id="order-count-pending">0</span>
+          </button>
+          <button type="button" class="order-status-tab-btn" onclick="app.setOrderStatusFilter('processing', this)">
+            <span><i class="fa-solid fa-boxes-packing" style="color:#3b82f6;"></i> جاري التجهيز</span>
+            <span class="tab-count-badge" id="order-count-processing">0</span>
+          </button>
+          <button type="button" class="order-status-tab-btn" onclick="app.setOrderStatusFilter('shipped', this)">
+            <span><i class="fa-solid fa-truck-fast" style="color:#8b5cf6;"></i> تم الشحن</span>
+            <span class="tab-count-badge" id="order-count-shipped">0</span>
+          </button>
+          <button type="button" class="order-status-tab-btn" onclick="app.setOrderStatusFilter('delivered', this)">
+            <span><i class="fa-solid fa-circle-check" style="color:#10b981;"></i> تم التوصيل</span>
+            <span class="tab-count-badge" id="order-count-delivered">0</span>
+          </button>
+          <button type="button" class="order-status-tab-btn" onclick="app.setOrderStatusFilter('cancelled', this)">
+            <span><i class="fa-solid fa-ban" style="color:#ef4444;"></i> ملغي</span>
+            <span class="tab-count-badge" id="order-count-cancelled">0</span>
+          </button>
+        </div>
+
+        <!-- Orders Quick Filter Bar -->
+        <div class="admin-filter-bar">
+          <div class="admin-search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="admin-orders-search" placeholder="ابحث برقم الطلب (ORD-...)، اسم العميل، الجوال أو المدينة..." oninput="app.filterAdminOrdersTable()">
+          </div>
+          <div class="admin-filter-selects">
+            <label for="admin-orders-filter" style="font-size:0.88rem; font-weight:700;"><i class="fa-solid fa-filter"></i> الحالة:</label>
+            <select id="admin-orders-filter" onchange="app.filterAdminOrders(this.value)">
+              <option value="all">جميع الحالات</option>
+              <option value="pending">قيد المراجعة</option>
+              <option value="processing">جاري التجهيز</option>
+              <option value="shipped">تم الشحن</option>
+              <option value="delivered">تم التوصيل</option>
+              <option value="cancelled">ملغي</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox" id="select-all-orders" onchange="app.toggleSelectAllOrders(this.checked)" title="تحديد جميع الطلبات"></th>
+                <th>رقم الطلب</th>
+                <th>العميل</th>
+                <th>الهاتف والمدينة</th>
+                <th>المبلغ الإجمالي</th>
+                <th>طريقة الدفع</th>
+                <th style="min-width:130px;">تغيير الحالة السريع</th>
+                <th>التاريخ</th>
+                <th>الإجراءات والطباعة</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Floating Bulk Action Bar for Orders -->
+        <div class="admin-bulk-actions-bar" id="orders-bulk-bar" style="display:none;">
+          <div class="bulk-meta">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>تم تحديد <strong id="orders-bulk-count">0</strong> طلب</span>
+          </div>
+          <div class="bulk-buttons">
+            <select id="orders-bulk-status-select" style="padding:6px 12px; border-radius:18px; border:1px solid rgba(255,255,255,0.3); background:#1e293b; color:#fff; font-size:0.82rem; font-weight:700;">
+              <option value="pending">تعيين كـ: قيد المراجعة</option>
+              <option value="processing">تعيين كـ: جاري التجهيز</option>
+              <option value="shipped">تعيين كـ: تم الشحن</option>
+              <option value="delivered">تعيين كـ: تم التوصيل</option>
+              <option value="cancelled">تعيين كـ: ملغي</option>
+            </select>
+            <button class="btn btn-primary" onclick="app.handleBulkApplyOrderStatus()"><i class="fa-solid fa-check"></i> تطبيق الحالة للمحددة</button>
+            <button class="btn btn-secondary" onclick="app.clearOrderSelection()"><i class="fa-solid fa-xmark"></i> إلغاء التحديد</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tab 3: Categories Management -->
+      <div id="categories-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <div>
+            <h3><i class="fa-solid fa-layer-group"></i> إدارة تصنيفات وأقسام المتجر</h3>
+            <span style="font-size:0.85rem; color:var(--text-light);">إضافة وتعديل أقسام الأزياء والملابس</span>
+          </div>
+          <button class="btn btn-primary" onclick="app.openCategoryModal()"><i class="fa-solid fa-plus"></i> إضافة تصنيف جديد</button>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>الأيقونة</th>
+                <th>اسم التصنيف (عربي)</th>
+                <th>اسم التصنيف (إنجليزي)</th>
+                <th>الرمز (Slug)</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="admin-categories-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 4: Users Management -->
+      <div id="users-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <div>
+            <h3><i class="fa-solid fa-users"></i> إدارة العملاء والمستخدمين (CRM)</h3>
+            <span class="badge" id="admin-users-summary" style="background:var(--primary-light); color:var(--primary); padding:4px 12px; border-radius:20px; font-weight:700;">6 مستخدمين</span>
+          </div>
+          <button class="btn btn-primary" onclick="app.openNewUserModal()"><i class="fa-solid fa-user-plus"></i> إضافة عميل جديد</button>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>البريد الإلكتروني</th>
+                <th>الهاتف</th>
+                <th>العنوان / المدينة</th>
+                <th>الصلاحية</th>
+                <th>الطلبات</th>
+                <th>إجمالي الإنفاق</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="admin-users-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 5: Reviews Management -->
+      <div id="reviews-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <h3>إدارة مراجعات وتقييمات العملاء</h3>
+          <span style="font-size:0.9rem; color:var(--text-light);">مراجعة تقييمات المنتجات والتحكم في المحتوى</span>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>المنتج</th>
+                <th>صاحب التقييم</th>
+                <th>التقييم</th>
+                <th>نص المراجعة</th>
+                <th>التاريخ</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="admin-reviews-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 6: Coupons Management -->
+      <div id="coupons-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <h3>إدارة كوبونات وأكواد الخصم</h3>
+          <button class="btn btn-primary" onclick="app.openCouponModal()"><i class="fa-solid fa-plus"></i> إضافة كود خصم جديد</button>
+        </div>
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>الكود</th>
+                <th>نسبة الخصم</th>
+                <th>الحد الأدنى</th>
+                <th>أقصى خصم</th>
+                <th>مرات الاستخدام</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="admin-coupons-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab 7: Store Settings -->
+      <div id="settings-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <h3>إعدادات وتخصيص المتجر</h3>
+          <span style="font-size:0.9rem; color:var(--text-light);">تعديل المعلومات الأساسية، العملة، وسياسات الشحن والضرائب</span>
+        </div>
+        <form onsubmit="app.handleSaveSettings(event)" class="settings-form" id="store-settings-form">
+          <div class="settings-grid">
+            <div class="form-group">
+              <label><i class="fa-solid fa-store"></i> اسم المتجر بالعربية *</label>
+              <input type="text" id="setting-store-name-ar" required placeholder="متجر النخبة الفاخر">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-globe"></i> اسم المتجر بالإنجليزية *</label>
+              <input type="text" id="setting-store-name-en" required placeholder="Elite Luxury Store">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-coins"></i> العملة المعروضة *</label>
+              <select id="setting-currency">
+                <option value="$">الدولار الأمريكي ($)</option>
+                <option value="SAR">الريال السعودي (ر.س)</option>
+                <option value="AED">الدرهم الإماراتي (د.إ)</option>
+                <option value="KWD">الدينار الكويتي (د.ك)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-truck"></i> رسوم الشحن الافتراضية ($) *</label>
+              <input type="number" step="0.01" id="setting-shipping-cost" required placeholder="15.00">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-gift"></i> الحد الأدنى للشحن المجاني ($) *</label>
+              <input type="number" step="0.01" id="setting-free-shipping" required placeholder="150.00">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-percent"></i> نسبة ضريبة القيمة المضافة (%) *</label>
+              <input type="number" step="0.1" id="setting-tax-percent" required placeholder="15">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-envelope"></i> البريد الإلكتروني للدعم *</label>
+              <input type="email" id="setting-contact-email" required placeholder="support@elite-store.com">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-phone"></i> رقم هاتف / واتساب الدعم *</label>
+              <input type="text" id="setting-contact-phone" required placeholder="+966 50 123 4567">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label><i class="fa-solid fa-bullhorn"></i> نص الشريط الإعلاني أعلى المتجر</label>
+              <input type="text" id="setting-announcement-text" placeholder="🎉 تخفيضات الموسم الكبرى: كود ELITE20 يمنحك خصماً فورياً 20%">
+            </div>
+          </div>
+          <div style="margin-top:20px; display:flex; justify-content:flex-end;">
+            <button type="submit" class="btn btn-primary" style="padding:10px 28px; font-weight:700;"><i class="fa-solid fa-floppy-disk"></i> حفظ الإعدادات</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tab 8: System & Database Management -->
+      <div id="database-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <h3><i class="fa-solid fa-server"></i> مركز إدارة وتهيئة قاعدة البيانات (MariaDB / MySQL System Tools)</h3>
+          <button class="btn btn-secondary" onclick="app.loadDatabaseSystemStats()"><i class="fa-solid fa-arrows-rotate"></i> تحديث الإحصائيات</button>
+        </div>
+
+        <!-- System Stats Cards Grid -->
+        <div class="db-stats-grid" id="db-stats-row" style="margin-bottom:24px;">
+          <!-- Dynamically populated with status, DB size, and table counts -->
+        </div>
+
+        <!-- Action Control Cards -->
+        <div class="db-tools-grid">
+          <!-- Card 1: Mock Data for Development -->
+          <div class="db-tool-card dev-card">
+            <div class="tool-card-icon" style="background: rgba(59, 130, 246, 0.1); color: var(--primary);">
+              <i class="fa-solid fa-flask"></i>
+            </div>
+            <h4>بيانات تجريبية لمرحلة التطوير (Mock Data)</h4>
+            <p>يولد ويغذي قاعدة البيانات بسجلات واقعية شاملة (مستخدمين، أزياء متنوعة، طلبات متعددة الحالات، تقييمات، وكوبونات) لتجربة واختبار كامل ميزات المتجر.</p>
+            <div class="tool-card-action">
+              <button class="btn btn-primary" onclick="app.resetMockData()"><i class="fa-solid fa-rotate"></i> إعادة توليد البيانات التجريبية</button>
+            </div>
+          </div>
+
+          <!-- Card 2: Clean Production DB -->
+          <div class="db-tool-card prod-card">
+            <div class="tool-card-icon" style="background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+              <i class="fa-solid fa-rocket"></i>
+            </div>
+            <h4>تهيئة قاعدة بيانات إنتاجية نظيفة (Clean Production)</h4>
+            <p>عند الانتهاء من التطوير والجاهزية للإطلاق الفعلي، يمسح هذا الإجراء كافة البيانات التجريبية ويُنشئ قاعدة بيانات نظيفة خالية من الطلبات الوهمية مع حساب المدير الأساسي فقط.</p>
+            <div class="tool-card-action">
+              <button class="btn btn-outline" style="border-color:var(--danger); color:var(--danger);" onclick="app.openCleanDbModal()"><i class="fa-solid fa-shield-halved"></i> تهيئة قاعدة بيانات الإنتاج</button>
+            </div>
+          </div>
+
+          <!-- Card 3: Backup & Export -->
+          <div class="db-tool-card backup-card">
+            <div class="tool-card-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);">
+              <i class="fa-solid fa-cloud-arrow-down"></i>
+            </div>
+            <h4>النسخ الاحتياطي للنظام وقاعدة البيانات (System Backup)</h4>
+            <p>تحميل نسخة احتياطية كاملة ومباشرة من قاعدة البيانات والبيانات المحفوظة للحفظ الخارجي أو الاسترجاع في أي وقت.</p>
+            <div class="tool-card-action">
+              <button class="btn btn-success" onclick="app.downloadDbBackup()"><i class="fa-solid fa-download"></i> تحميل نسخة احتياطية</button>
+            </div>
+          </div>
+
+          <!-- Card 4: MariaDB Table Optimizer & Cache Flush -->
+          <div class="db-tool-card optimize-card">
+            <div class="tool-card-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h4>تحسين وصيانة محرك جداول MariaDB وتفريغ الكاش</h4>
+            <p>يقوم بتنفيذ استعلامات OPTIMIZE TABLE و ANALYZE على كافة جداول المتجر في MariaDB لترتيب الفهارس واسترجاع الذاكرة، ثم يفرغ ذاكرة الكاش في Laravel.</p>
+            <div class="tool-card-action">
+              <button class="btn btn-primary" style="background:#8b5cf6; border-color:#8b5cf6;" onclick="app.optimizeDatabaseTables()"><i class="fa-solid fa-wand-magic-sparkles"></i> تشغيل الصيانة الفورية</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Database Tables Breakdown -->
+        <div class="analytics-card" style="margin-top:24px;">
+          <div class="analytics-card-header">
+            <div>
+              <h4><i class="fa-solid fa-table-list" style="color:var(--primary);"></i> فحص تفصيلي لجداول محرك MariaDB (Table Schemas)</h4>
+              <span style="font-size:0.8rem; color:var(--text-light);">حالة الجداول، نوع المحرك (InnoDB)، عدد السجلات وحجم الذاكرة المستهلكة</span>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>اسم الجدول</th>
+                  <th>محرك التخزين</th>
+                  <th>عدد السجلات</th>
+                  <th>حجم البيانات</th>
+                  <th>حجم الفهارس</th>
+                  <th>الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="admin-db-tables-body">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /#database-tab -->
+
+        </div><!-- /.admin-content-body -->
+      </div><!-- /.admin-main-wrapper -->
+    </div><!-- /.admin-portal-layout -->
+  </main>
+
+  <!-- CART DRAWER -->
+  <div class="drawer-overlay" id="cart-overlay" onclick="app.toggleCartDrawer()"></div>
+  <div class="cart-drawer" id="cart-drawer">
+    <div class="drawer-header">
+      <h3><i class="fa-solid fa-basket-shopping"></i> سلة التسوق (<span id="drawer-cart-count">0</span>)</h3>
+      <button class="close-btn" onclick="app.toggleCartDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Free Shipping Progress -->
+    <div class="free-shipping-bar" id="shipping-progress-container">
+      <div class="shipping-msg" id="shipping-msg">أضف $150.00 للحصول على شحن مجاني!</div>
+      <div class="progress-track"><div class="progress-fill" id="shipping-fill"></div></div>
+    </div>
+
+    <div class="drawer-body" id="cart-items-container">
+      <!-- Items dynamically injected -->
+    </div>
+
+    <div class="drawer-footer">
+      <!-- Coupon Box in Drawer -->
+      <div class="coupon-box">
+        <div class="coupon-input-group">
+          <input type="text" id="cart-coupon-input" placeholder="كود الخصم (مثل WELCOME10)">
+          <button class="btn btn-outline" type="button" onclick="app.applyCoupon()">تطبيق</button>
+        </div>
+        <div id="coupon-applied-tag" class="coupon-tag" style="display:none;"></div>
+      </div>
+
+      <div class="summary-line">
+        <span>المجموع الفرعي:</span>
+        <span class="price-val" id="cart-subtotal">$0.00</span>
+      </div>
+      <div class="summary-line discount-row" id="cart-discount-line" style="display:none;">
+        <span>خصم الكوبون:</span>
+        <span class="price-val" id="cart-discount">-$0.00</span>
+      </div>
+      <div class="summary-line">
+        <span>رسوم الشحن:</span>
+        <span class="price-val" id="cart-shipping-fee">$15.00</span>
+      </div>
+      <div class="summary-line total-line">
+        <span>المبلغ الإجمالي:</span>
+        <span class="price-val" id="cart-total">$0.00</span>
+      </div>
+      <button class="btn btn-primary btn-block" id="checkout-btn" onclick="app.openCheckoutModal()">
+        متابعة إتمام الشراء <i class="fa-solid fa-arrow-left"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- QUICK VIEW PRODUCT MODAL -->
+  <div class="modal" id="product-modal">
+    <div class="modal-overlay" onclick="app.closeModal('product-modal')"></div>
+    <div class="modal-content product-quickview-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('product-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div class="quickview-grid" id="quickview-body">
+        <!-- Dynamically injected -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="modal" id="checkout-modal">
+    <div class="modal-overlay" onclick="app.closeModal('checkout-modal')"></div>
+    <div class="modal-content checkout-modal-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('checkout-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div class="checkout-header">
+        <h2><i class="fa-solid fa-shield-heart"></i> إتمام عملية الشراء</h2>
+        <p>يرجى إدخال تفاصيل الشحن وطريقة الدفع لتأكيد طلبك</p>
+      </div>
+
+      <form id="checkout-form" onsubmit="app.handlePlaceOrder(event)" class="checkout-grid">
+        <div class="checkout-fields">
+          <div class="form-group">
+            <label><i class="fa-solid fa-user"></i> الاسم الكامل *</label>
+            <input type="text" id="cust-name" required placeholder="أدخل اسمك الثلاثي">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label><i class="fa-solid fa-phone"></i> رقم الهاتف *</label>
+              <input type="tel" id="cust-phone" required placeholder="050XXXXXXX">
+            </div>
+            <div class="form-group">
+              <label><i class="fa-solid fa-city"></i> المدينة *</label>
+              <select id="cust-city" required>
+                <option value="الرياض">الرياض</option>
+                <option value="جدة">جدة</option>
+                <option value="الدمام">الدمام</option>
+                <option value="مكة المكرمة">مكة المكرمة</option>
+                <option value="المدينة المنورة">المدينة المنورة</option>
+                <option value="الخبر">الخبر</option>
+                <option value="دبي">دبي</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-location-dot"></i> العنوان التفصيلي *</label>
+            <input type="text" id="cust-address" required placeholder="الحي، اسم الشارع، رقم المبنى">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-envelope"></i> البريد الإلكتروني (لتأكيد الطلب)</label>
+            <input type="email" id="cust-email" placeholder="example@domain.com">
+          </div>
+
+          <!-- PAYMENT METHODS -->
+          <div class="form-group">
+            <label><i class="fa-solid fa-credit-card"></i> طريقة الدفع</label>
+            <div class="payment-grid">
+              <label class="payment-method-card active" onclick="app.selectPaymentMethod('cod', this)">
+                <input type="radio" name="payment_method" value="cod" checked>
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+                <span>عند الاستلام</span>
+              </label>
+              <label class="payment-method-card" onclick="app.selectPaymentMethod('card', this)">
+                <input type="radio" name="payment_method" value="card">
+                <i class="fa-solid fa-credit-card"></i>
+                <span>مدى / بطاقة بنكية</span>
+              </label>
+              <label class="payment-method-card" onclick="app.selectPaymentMethod('apple_pay', this)">
+                <input type="radio" name="payment_method" value="apple_pay">
+                <i class="fa-brands fa-apple"></i>
+                <span>Apple Pay</span>
+              </label>
+              <label class="payment-method-card" onclick="app.selectPaymentMethod('bank_transfer', this)">
+                <input type="radio" name="payment_method" value="bank_transfer">
+                <i class="fa-solid fa-building-columns"></i>
+                <span>تحويل بنكي</span>
+              </label>
+            </div>
+
+            <!-- Card Simulation Details -->
+            <div id="card-inputs-container" class="card-details-box" style="display:none;">
+              <input type="text" id="card-num" placeholder="رقم البطاقة: 4000 1234 5678 9010" maxlength="19">
+              <div class="form-row">
+                <input type="text" id="card-exp" placeholder="MM/YY" maxlength="5">
+                <input type="password" id="card-cvv" placeholder="CVV (3 أرقام)" maxlength="4">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fa-solid fa-note-sticky"></i> ملاحظات إضافية للتوصيل</label>
+            <textarea id="cust-notes" rows="2" placeholder="أي تعليمات خاصة بالسائق..."></textarea>
+          </div>
+        </div>
+
+        <!-- Checkout Side Summary -->
+        <div class="checkout-summary-box">
+          <h3>ملخص الطلب</h3>
+          <div class="summary-items-list" id="checkout-items-preview">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="summary-calc">
+            <div class="calc-row"><span>المجموع الفرعي:</span><span id="checkout-subtotal">$0.00</span></div>
+            <div class="calc-row discount-row" id="checkout-discount-row" style="display:none;">
+              <span>خصم الكوبون:</span><span id="checkout-discount">-$0.00</span>
+            </div>
+            <div class="calc-row"><span>رسوم الشحن:</span><span id="checkout-shipping">$0.00</span></div>
+            <div class="calc-row total"><span>الإجمالي المستحق:</span><span id="checkout-total">$0.00</span></div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-order-btn">
+            <i class="fa-solid fa-check-circle"></i> تأكيد وإرسال الطلب
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ORDER SUCCESS CONFIRMATION MODAL -->
+  <div class="modal" id="order-success-modal">
+    <div class="modal-overlay" onclick="app.closeModal('order-success-modal')"></div>
+    <div class="modal-content success-modal-content">
+      <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <h2>تم تأكيد طلبك بنجاح!</h2>
+      <p class="success-msg">شكراً لتسوقك معنا. تم حفظ الطلب في قاعدة البيانات وهو قيد المتابعة للشحن.</p>
+
+      <div class="order-details-card">
+        <div class="detail-row"><span>رقم الطلب:</span><strong id="succ-order-num">-</strong></div>
+        <div class="detail-row"><span>إجمالي المبلغ:</span><strong id="succ-order-total">-</strong></div>
+        <div class="detail-row"><span>طريقة الدفع:</span><span id="succ-order-pay">-</span></div>
+        <div class="detail-row"><span>العنوان:</span><span id="succ-order-address">-</span></div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:16px;">
+        <button class="btn btn-success btn-block" onclick="app.showInvoice(app.lastPlacedOrder)">
+          <i class="fa-solid fa-receipt"></i> عرض وطباعة الفاتورة الضريبية
+        </button>
+        <button class="btn btn-secondary btn-block" onclick="app.closeModal('order-success-modal'); app.showStoreView();">
+          العودة للتسوق
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPLE PAY SHEET MODAL -->
+  <div class="modal" id="apple-pay-sheet-modal">
+    <div class="modal-overlay" onclick="app.closeModal('apple-pay-sheet-modal')"></div>
+    <div class="modal-content" style="max-width: 440px; padding: 0; background: transparent; box-shadow: none;">
+      <div class="apple-pay-card">
+        <div class="apple-pay-header">
+          <div class="apple-pay-logo"><i class="fa-brands fa-apple"></i> Pay</div>
+          <button class="btn-text" onclick="app.closeModal('apple-pay-sheet-modal')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:12px;">الدفع إلى: <strong>متجر النخبة (ELITE STORE)</strong></div>
+        <div class="apple-card-visual">
+          <div>
+            <div style="font-size:0.75rem; color:#bfdbfe;">البطاقة الافتراضية</div>
+            <strong style="font-size:1rem;">مدى الراجحي •••• 8820</strong>
+          </div>
+          <i class="fa-solid fa-credit-card" style="font-size:1.8rem; color:#93c5fd;"></i>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.95rem;">
+          <span style="color:#a1a1aa;">المبلغ الإجمالي:</span>
+          <strong style="font-size:1.2rem; color:#fff;" id="apple-pay-total">$0.00</strong>
+        </div>
+        <div style="text-align:center; margin:16px 0 6px; color:#a1a1aa; font-size:0.85rem;">
+          <i class="fa-solid fa-face-smile" style="font-size:2rem; display:block; margin-bottom:6px; color:#fff;"></i>
+          انقر مرتين على الزر الجانبي للتأكيد عبر Face ID
+        </div>
+        <button class="apple-pay-confirm-btn" onclick="app.confirmApplePay()">
+          <i class="fa-brands fa-apple"></i> دفع بواسطة Apple Pay
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OTP 3D-SECURE MODAL -->
+  <div class="modal" id="otp-modal">
+    <div class="modal-overlay" onclick="app.closeModal('otp-modal')"></div>
+    <div class="modal-content" style="max-width: 440px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('otp-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div class="otp-box-wrap">
+        <i class="fa-solid fa-shield-halved" style="font-size:2.8rem; color:var(--primary); margin-bottom:10px;"></i>
+        <h3>التحقق بخطوتين (3D Secure)</h3>
+        <p style="font-size:0.88rem; color:var(--text-light); margin-top:6px;">
+          تم إرسال رمز التحقق المكون من 6 أرقام برسالة نصية إلى رقم جوالك المسجل المنتهي بـ <strong>*4321</strong>
+        </p>
+
+        <div class="otp-inputs">
+          <input type="text" maxlength="1" class="otp-digit" value="1">
+          <input type="text" maxlength="1" class="otp-digit" value="2">
+          <input type="text" maxlength="1" class="otp-digit" value="3">
+          <input type="text" maxlength="1" class="otp-digit" value="4">
+          <input type="text" maxlength="1" class="otp-digit" value="5">
+          <input type="text" maxlength="1" class="otp-digit" value="6">
+        </div>
+
+        <button class="btn btn-primary btn-block btn-lg" onclick="app.confirmOtpPayment()">
+          <i class="fa-solid fa-check"></i> تأكيد وإتمام العملية
+        </button>
+
+        <div style="margin-top:14px; font-size:0.82rem; color:var(--text-light);">
+          رمز الاختبار السريع: <strong>123456</strong> | صلاحية الرمز: <span style="color:var(--danger)">02:59</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVOICE MODAL -->
+  <div class="modal" id="invoice-modal">
+    <div class="modal-overlay" onclick="app.closeModal('invoice-modal')"></div>
+    <div class="modal-content" style="max-width: 780px; padding: 20px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('invoice-modal')"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="invoice-wrap" id="invoice-printable-area">
+        <div class="invoice-header-row">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <div class="logo-icon" style="width:34px; height:34px; font-size:1.1rem;"><i class="fa-solid fa-bag-shopping"></i></div>
+              <strong style="font-size:1.3rem;">متجر النخبة | ELITE STORE</strong>
+            </div>
+            <div style="font-size:0.82rem; color:var(--text-light); line-height:1.4;">
+              فاتورة ضريبية مبسطة (Simplified Tax Invoice)<br>
+              الرقم الضريبي: <strong>310123456700003</strong> | السجل التجاري: <strong>1010889922</strong><br>
+              المملكة العربية السعودية - الرياض
+            </div>
+          </div>
+          <div style="text-align:left;">
+            <h3 style="color:var(--primary); font-size:1.2rem; margin-bottom:4px;">فاتورة رسمية</h3>
+            <div style="font-size:0.85rem;"><strong>رقم الفاتورة:</strong> <span id="inv-num">-</span></div>
+            <div style="font-size:0.85rem;"><strong>التاريخ:</strong> <span id="inv-date">-</span></div>
+            <div style="font-size:0.85rem;"><strong>طريقة الدفع:</strong> <span id="inv-payment">-</span></div>
+          </div>
+        </div>
+
+        <div class="invoice-meta-grid">
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-light);">بيانات العميل:</div>
+            <strong id="inv-cust-name">-</strong>
+            <div style="font-size:0.85rem;" id="inv-cust-phone">-</div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem; color:var(--text-light);">عنوان التسليم:</div>
+            <div style="font-size:0.88rem;" id="inv-cust-address">-</div>
+          </div>
+        </div>
+
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>المنتج</th>
+              <th>الكمية</th>
+              <th>سعر الوحدة</th>
+              <th>المجموع</th>
+            </tr>
+          </thead>
+          <tbody id="inv-items-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+          <div class="invoice-qr-row" style="border:none; margin:0; padding:0;">
+            <svg id="inv-qr-svg" width="90" height="90" viewBox="0 0 100 100" style="background:#fff; border:1px solid #ccc; padding:4px; border-radius:4px;">
+              <!-- Simulated ZATCA compliant visual QR pattern -->
+              <rect width="100" height="100" fill="#fff"/>
+              <rect x="10" y="10" width="25" height="25" fill="#000"/>
+              <rect x="15" y="15" width="15" height="15" fill="#fff"/>
+              <rect x="19" y="19" width="7" height="7" fill="#000"/>
+              <rect x="65" y="10" width="25" height="25" fill="#000"/>
+              <rect x="70" y="15" width="15" height="15" fill="#fff"/>
+              <rect x="74" y="19" width="7" height="7" fill="#000"/>
+              <rect x="10" y="65" width="25" height="25" fill="#000"/>
+              <rect x="15" y="70" width="15" height="15" fill="#fff"/>
+              <rect x="19" y="74" width="7" height="7" fill="#000"/>
+              <rect x="42" y="15" width="8" height="15" fill="#000"/>
+              <rect x="42" y="40" width="15" height="8" fill="#000"/>
+              <rect x="65" y="42" width="15" height="15" fill="#000"/>
+              <rect x="40" y="65" width="10" height="20" fill="#000"/>
+              <rect x="60" y="70" width="25" height="8" fill="#000"/>
+            </svg>
+            <div style="margin-right:12px; font-size:0.75rem; color:var(--text-light);">
+              رمز الاستجابة السريع المعتمد<br>
+              متوافق مع متطلبات هيئة الزكاة والضريبة والجمارك
+            </div>
+          </div>
+
+          <div class="invoice-calc-box">
+            <div class="invoice-calc-row"><span>المجموع الخاضع للضريبة:</span><strong id="inv-subtotal">$0.00</strong></div>
+            <div class="invoice-calc-row" id="inv-discount-row" style="color:var(--success); display:none;">
+              <span>خصم الكوبون:</span><strong id="inv-discount">-$0.00</strong>
+            </div>
+            <div class="invoice-calc-row"><span>رسوم الشحن:</span><strong id="inv-shipping">$0.00</strong></div>
+            <div class="invoice-calc-row"><span>ضريبة القيمة المضافة (15% مشمولة):</span><span id="inv-vat">$0.00</span></div>
+            <div class="invoice-calc-row grand-total"><span>الإجمالي النهائي المستحق:</span><strong id="inv-total">$0.00</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="invoice-actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+        <button class="btn btn-primary" onclick="window.print()">
+          <i class="fa-solid fa-print"></i> طباعة الفاتورة / حفظ كـ PDF
+        </button>
+        <button class="btn btn-secondary" onclick="app.closeModal('invoice-modal')">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN ADD COUPON MODAL -->
+  <div class="modal" id="admin-coupon-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-coupon-modal')"></div>
+    <div class="modal-content" style="max-width: 460px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-coupon-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-tag"></i> إضافة كود خصم جديد</h2>
+      <form onsubmit="app.handleSaveCoupon(event)" class="admin-form" style="margin-top:16px;">
+        <div class="form-group">
+          <label>كود الكوبون (رمز الخصم) *</label>
+          <input type="text" id="coupon-code" required placeholder="مثال: SUMMER25" style="text-transform:uppercase; font-weight:700;">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>نسبة الخصم (%) *</label>
+            <input type="number" min="1" max="90" id="coupon-percent" required placeholder="25">
+          </div>
+          <div class="form-group">
+            <label>الحد الأدنى للطلب ($)</label>
+            <input type="number" step="0.01" id="coupon-min" placeholder="50.00" value="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>الحد الأقصى لمبلغ الخصم ($)</label>
+          <input type="number" step="0.01" id="coupon-max" placeholder="100.00" value="100">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-plus"></i> إنشاء وتفعيل الكوبون</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL (LOGIN / REGISTER) -->
+  <div class="modal" id="auth-modal">
+    <div class="modal-overlay" onclick="app.closeModal('auth-modal')"></div>
+    <div class="modal-content" style="max-width: 440px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('auth-modal')"><i class="fa-solid fa-xmark"></i></button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tab-btn-login" onclick="app.switchAuthTab('login')">تسجيل الدخول</button>
+        <button class="auth-tab-btn" id="tab-btn-register" onclick="app.switchAuthTab('register')">إنشاء حساب جديد</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="login-form" onsubmit="app.handleLogin(event)">
+        <div class="form-group">
+          <label>البريد الإلكتروني</label>
+          <input type="email" id="login-email" required placeholder="name@domain.com">
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور</label>
+          <input type="password" id="login-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-right-to-bracket"></i> دخول</button>
+        <div class="demo-account-box">
+          <span>حساب تجريبي للعميل:</span>
+          <button type="button" onclick="app.fillDemoCustomer()">تعبئة تجريبية</button>
+        </div>
+      </form>
+
+      <!-- Register Form -->
+      <form id="register-form" onsubmit="app.handleRegister(event)" style="display:none;">
+        <div class="form-group">
+          <label>الاسم الكامل *</label>
+          <input type="text" id="reg-name" required placeholder="الاسم الثلاثي">
+        </div>
+        <div class="form-group">
+          <label>البريد الإلكتروني *</label>
+          <input type="email" id="reg-email" required placeholder="name@domain.com">
+        </div>
+        <div class="form-group">
+          <label>رقم الهاتف</label>
+          <input type="tel" id="reg-phone" placeholder="050XXXXXXX">
+        </div>
+        <div class="form-group">
+          <label>العنوان الأساسي</label>
+          <input type="text" id="reg-address" placeholder="المدينة، الحي...">
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور *</label>
+          <input type="password" id="reg-password" required placeholder="6 أحرف على الأقل">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-user-plus"></i> إنشاء الحساب</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN AUTH GATE MODAL -->
+  <div class="modal" id="admin-gate-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-gate-modal')"></div>
+    <div class="modal-content" style="max-width: 440px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-gate-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-lock"></i> تسجيل دخول المشرف</h2>
+      <p style="font-size: 0.9rem; margin-bottom: 16px;">يرجى تسجيل الدخول بحساب المشرف للوصول إلى لوحة الإدارة وقاعدة البيانات.</p>
+      <form onsubmit="app.handleAdminLogin(event)">
+        <div class="form-group">
+          <label>البريد الإلكتروني للمشرف</label>
+          <input type="email" id="admin-gate-email" required placeholder="admin@elite.com">
+        </div>
+        <div class="form-group">
+          <label>كلمة المرور</label>
+          <input type="password" id="admin-gate-password" required placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-shield-halved"></i> التحقق والدخول للوحة</button>
+        <div class="demo-account-box">
+          <span>بيانات المشرف الافتراضية:</span>
+          <button type="button" onclick="app.fillDemoAdmin()">تعبئة المشرف</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CUSTOMER ORDERS MODAL -->
+  <div class="modal" id="customer-orders-modal">
+    <div class="modal-overlay" onclick="app.closeModal('customer-orders-modal')"></div>
+    <div class="modal-content" style="max-width: 600px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('customer-orders-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-box-open"></i> سجل طلباتي</h2>
+      <div id="customer-orders-container" class="orders-history-list">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKING MODAL -->
+  <div class="modal" id="tracking-modal">
+    <div class="modal-overlay" onclick="app.closeModal('tracking-modal')"></div>
+    <div class="modal-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('tracking-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-location-crosshairs"></i> تتبع حالة طلبك</h2>
+      <p>أدخل رقم الطلب الذي حصلت عليه (مثال: ELITE-XXXXXX-XXXX)</p>
+      <div class="tracking-form-wrap">
+        <div class="form-group">
+          <input type="text" id="track-order-number" placeholder="رقم الطلب...">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="app.handleTrackOrder()">تتبع الآن</button>
+      </div>
+      <div id="tracking-result" class="tracking-result-box" style="display:none;">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- WISHLIST MODAL -->
+  <div class="modal" id="wishlist-modal">
+    <div class="modal-overlay" onclick="app.closeModal('wishlist-modal')"></div>
+    <div class="modal-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('wishlist-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-heart"></i> قائمة المفضلة</h2>
+      <div id="wishlist-items-container" class="wishlist-grid">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN ADD/EDIT PRODUCT MODAL -->
+  <div class="modal" id="admin-product-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-product-modal')"></div>
+    <div class="modal-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-product-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2 id="product-form-title">إضافة منتج جديد</h2>
+      <form id="product-form" onsubmit="app.handleSaveProduct(event)" class="admin-form">
+        <input type="hidden" id="admin-prod-id">
+        <div class="form-group">
+          <label>اسم المنتج (بالعربية) *</label>
+          <input type="text" id="admin-prod-name-ar" required placeholder="مثال: ساعة يد رجالية فاخرة">
+        </div>
+        <div class="form-group">
+          <label>اسم المنتج (بالإنجليزية)</label>
+          <input type="text" id="admin-prod-name-en" placeholder="Example: Men Luxury Watch">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>التصنيف *</label>
+            <select id="admin-prod-category" required>
+              <option value="1">إلكترونيات وأجهزة</option>
+              <option value="2">أزياء وملابس</option>
+              <option value="3">عطور وعناية</option>
+              <option value="4">ساعات وإكسسوارات</option>
+              <option value="5">مستلزمات منزلية</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>السعر ($) *</label>
+            <input type="number" step="0.01" id="admin-prod-price" required placeholder="99.99">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>السعر الأصلي قبل الخصم (اختياري)</label>
+            <input type="number" step="0.01" id="admin-prod-orig-price" placeholder="129.99">
+          </div>
+          <div class="form-group">
+            <label>الكمية في المخزون *</label>
+            <input type="number" id="admin-prod-stock" required value="10">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>الشارة الترويجية (Badge)</label>
+            <input type="text" id="admin-prod-badge" placeholder="مثال: خصم 20%، جديد، الأكثر مبيعاً">
+          </div>
+          <div class="form-group">
+            <label>رابط صورة المنتج (URL)</label>
+            <input type="url" id="admin-prod-image" placeholder="https://images.unsplash.com/...">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fa-solid fa-ruler"></i> المقاسات المتاحة (مفصولة بفاصلة)</label>
+            <input type="text" id="admin-prod-sizes" placeholder="مثال: S, M, L, XL, XXL أو 48, 50, 52">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-scissors"></i> نوع القصة (Fit)</label>
+            <select id="admin-prod-fit">
+              <option value="Regular Fit">Regular Fit (كلاسيكي)</option>
+              <option value="Slim Fit">Slim Fit (متناسق ضيق)</option>
+              <option value="Modern Fit">Modern Fit (عصري)</option>
+              <option value="Oversized">Oversized (شبابي واسع)</option>
+              <option value="Classic Cut">Classic Cut (تفصيل عربي)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fa-solid fa-fingerprint"></i> نوع الخامة والقماش</label>
+            <input type="text" id="admin-prod-material" placeholder="مثال: صوف إيطالي Super 150s، قطن مصري 100%">
+          </div>
+          <div class="form-group">
+            <label><i class="fa-solid fa-hands-bubbles"></i> إرشادات العناية والغسيل</label>
+            <input type="text" id="admin-prod-care" placeholder="مثال: تنظيف جاف فقط، كوي بالبخار">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>وصف وتفاصيل القطعة</label>
+          <textarea id="admin-prod-desc" rows="3" placeholder="اكتب تفاصيل القصة والقماش والمناسبات الملائمة..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> حفظ المنتج في قاعدة البيانات (MariaDB)</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SIZE GUIDE MODAL (دليل المقاسات الشامل) -->
+  <div class="modal" id="size-guide-modal">
+    <div class="modal-overlay" onclick="app.closeModal('size-guide-modal')"></div>
+    <div class="modal-content size-guide-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('size-guide-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <div style="width:44px; height:44px; border-radius:10px; background:var(--primary-light); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.3rem;">
+          <i class="fa-solid fa-ruler-combined"></i>
+        </div>
+        <div>
+          <h2 style="margin:0; font-size:1.3rem;">دليل المقاسات المعتمد</h2>
+          <p style="margin:2px 0 0; color:var(--text-light); font-size:0.85rem;">اختر نوع الملابس لمعرفة القياس الدقيق بالسنتمتر والبوصة</p>
+        </div>
+      </div>
+
+      <!-- Size Guide Tabs -->
+      <div class="size-guide-tabs">
+        <button type="button" class="size-guide-tab-btn active" onclick="app.switchSizeGuideTab('suits', this)">البدلات والقمصان</button>
+        <button type="button" class="size-guide-tab-btn" onclick="app.switchSizeGuideTab('thobes', this)">الثياب العربية</button>
+        <button type="button" class="size-guide-tab-btn" onclick="app.switchSizeGuideTab('casual', this)">الكاجوال والشبابي</button>
+        <button type="button" class="size-guide-tab-btn" onclick="app.switchSizeGuideTab('shoes', this)">الأحذية الجلدية</button>
+      </div>
+
+      <!-- Tab Content 1: Suits -->
+      <div id="size-tab-suits" class="size-guide-tab-panel">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>المقاس (EU)</th>
+              <th>الصدر (سم)</th>
+              <th>الخصر (سم)</th>
+              <th>الكتف (سم)</th>
+              <th>المقاس المقابل</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>46</td><td>92 - 95</td><td>80 - 83</td><td>44</td><td>S</td></tr>
+            <tr><td>48</td><td>96 - 99</td><td>84 - 87</td><td>45</td><td>M</td></tr>
+            <tr><td>50</td><td>100 - 103</td><td>88 - 91</td><td>46</td><td>L</td></tr>
+            <tr><td>52</td><td>104 - 107</td><td>92 - 95</td><td>47</td><td>XL</td></tr>
+            <tr><td>54</td><td>108 - 111</td><td>96 - 99</td><td>48</td><td>XXL</td></tr>
+            <tr><td>56</td><td>112 - 116</td><td>100 - 104</td><td>49</td><td>3XL</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab Content 2: Thobes -->
+      <div id="size-tab-thobes" class="size-guide-tab-panel" style="display:none;">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>مقاس الثوب (بوصة)</th>
+              <th>طول الشخص (سم)</th>
+              <th>عرض الصدر (سم)</th>
+              <th>طول الكم (سم)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>54</td><td>160 - 165</td><td>54 - 56</td><td>58</td></tr>
+            <tr><td>56</td><td>166 - 172</td><td>56 - 58</td><td>60</td></tr>
+            <tr><td>58</td><td>173 - 178</td><td>58 - 61</td><td>62</td></tr>
+            <tr><td>60</td><td>179 - 184</td><td>61 - 64</td><td>64</td></tr>
+            <tr><td>62</td><td>185 - 192</td><td>64 - 67</td><td>66</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab Content 3: Casual -->
+      <div id="size-tab-casual" class="size-guide-tab-panel" style="display:none;">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>المقاس</th>
+              <th>محيط الصدر (سم)</th>
+              <th>الطول (سم)</th>
+              <th>الوزن الموصى به</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>S</td><td>90 - 95</td><td>68</td><td>55 - 65 كجم</td></tr>
+            <tr><td>M</td><td>96 - 102</td><td>70</td><td>65 - 75 كجم</td></tr>
+            <tr><td>L</td><td>103 - 109</td><td>72</td><td>75 - 85 كجم</td></tr>
+            <tr><td>XL</td><td>110 - 116</td><td>74</td><td>85 - 95 كجم</td></tr>
+            <tr><td>XXL</td><td>117 - 124</td><td>76</td><td>95 - 110 كجم</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Tab Content 4: Shoes -->
+      <div id="size-tab-shoes" class="size-guide-tab-panel" style="display:none;">
+        <table class="size-table">
+          <thead>
+            <tr>
+              <th>المقاس الأوروبي (EU)</th>
+              <th>المقاس الأمريكي (US)</th>
+              <th>المقاس البريطاني (UK)</th>
+              <th>طول القدم (سم)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>40</td><td>7.0</td><td>6.5</td><td>25.0</td></tr>
+            <tr><td>41</td><td>8.0</td><td>7.5</td><td>25.7</td></tr>
+            <tr><td>42</td><td>8.5</td><td>8.0</td><td>26.3</td></tr>
+            <tr><td>43</td><td>9.5</td><td>9.0</td><td>27.0</td></tr>
+            <tr><td>44</td><td>10.0</td><td>9.5</td><td>27.7</td></tr>
+            <tr><td>45</td><td>11.0</td><td>10.5</td><td>28.3</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="size-tip-box">
+        <i class="fa-solid fa-lightbulb" style="color:#f59e0b;"></i>
+        <strong>نصيحة أخصائي القياس:</strong> استخدم شريط قياس قماشي مرن، وتأكد من التنفس بارتياح أثناء قياس الصدر والخصر دون شد الشريط بقوة. إذا كنت بين مقاسين، ننصح دائماً باختيار المقاس الأكبر لراحة تامة.
+      </div>
+    </div>
+  </div>
+
+  <!-- SMART SIZE RECOMMENDER MODAL (حاسبة المقاس الذكية) -->
+  <div class="modal" id="smart-size-modal">
+    <div class="modal-overlay" onclick="app.closeModal('smart-size-modal')"></div>
+    <div class="modal-content smart-size-content">
+      <button class="close-btn modal-close" onclick="app.closeModal('smart-size-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <div style="width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color:#ffffff; display:flex; align-items:center; justify-content:center; font-size:1.4rem;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h2 style="margin:0; font-size:1.3rem;">حاسبة المقاس الذكية</h2>
+          <p style="margin:2px 0 0; color:var(--text-light); font-size:0.85rem;">خوارزمية ذكية تحدد مقاسك المثالي بدقة 98% بناءً على قياساتك وتفضيلاتك</p>
+        </div>
+      </div>
+
+      <!-- Measurement Inputs -->
+      <div class="smart-inputs-grid">
+        <div class="smart-input-box">
+          <label><i class="fa-solid fa-arrows-up-down"></i> الطول التقريبي</label>
+          <div class="smart-input-val"><span id="smart-height-display">175</span> <small style="font-size:0.8rem; color:var(--text-light);">سم</small></div>
+          <input type="range" id="smart-height" min="150" max="205" value="175" oninput="document.getElementById('smart-height-display').innerText = this.value; app.runSmartSizeCalculation();" style="width:100%; accent-color:var(--primary);">
+        </div>
+        <div class="smart-input-box">
+          <label><i class="fa-solid fa-weight-scale"></i> الوزن التقريبي</label>
+          <div class="smart-input-val"><span id="smart-weight-display">75</span> <small style="font-size:0.8rem; color:var(--text-light);">كجم</small></div>
+          <input type="range" id="smart-weight" min="45" max="130" value="75" oninput="document.getElementById('smart-weight-display').innerText = this.value; app.runSmartSizeCalculation();" style="width:100%; accent-color:var(--primary);">
+        </div>
+      </div>
+
+      <!-- Fit / Body Preference -->
+      <label style="font-size:0.85rem; font-weight:700; color:var(--text-light); display:block; margin-bottom:6px;">
+        <i class="fa-solid fa-shirt"></i> تفضيلك في قصة الملابس:
+      </label>
+      <div class="build-preference-grid">
+        <div class="build-card active" data-fit="slim" onclick="app.selectBuildPreference('slim', this)">
+          <i class="fa-solid fa-person"></i>
+          <span>ممشوق / Slim</span>
+        </div>
+        <div class="build-card" data-fit="regular" onclick="app.selectBuildPreference('regular', this)">
+          <i class="fa-solid fa-person-walking"></i>
+          <span>كلاسيكي / Regular</span>
+        </div>
+        <div class="build-card" data-fit="relaxed" onclick="app.selectBuildPreference('relaxed', this)">
+          <i class="fa-solid fa-child-reaching"></i>
+          <span>مريح / Relaxed</span>
+        </div>
+      </div>
+
+      <!-- Calculated Recommendation Box -->
+      <div id="smart-recommendation-result" class="smart-recommendation-box" style="display:block;">
+        <span style="font-size:0.85rem; color:var(--text-light); font-weight:700;">المقاس الأنسب والموصى به لك:</span>
+        <div>
+          <span class="rec-size-badge" id="rec-size-output">L</span>
+        </div>
+        <p style="font-size:0.82rem; color:var(--text); margin:4px 0 0;" id="rec-size-explanation">
+          بناءً على وزن 75 كجم وطول 175 سم وقصة ممشوقة، مقاس L يمنحك راحة مثالية وانسيابية على الصدر والكتفين.
+        </p>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:14px;">
+        <button type="button" class="btn btn-secondary" style="flex:1;" onclick="app.closeModal('smart-size-modal')">إغلاق</button>
+        <button type="button" class="btn btn-primary" style="flex:2;" onclick="app.applySmartSizeToQuickView()">
+          <i class="fa-solid fa-check-double"></i> اعتماد هذا المقاس للقطعة
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN WAREHOUSE PACKING SLIP MODAL (بوليصة تجهيز الشحنة وفحص المقاسات) -->
+  <div class="modal" id="admin-packing-slip-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-packing-slip-modal')"></div>
+    <div class="modal-content packing-slip-content">
+      <button class="close-btn modal-close no-print" onclick="app.closeModal('admin-packing-slip-modal')"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="packing-slip-header">
+        <div>
+          <h2 style="margin:0; font-size:1.5rem; color:#0f172a;"><i class="fa-solid fa-boxes-packing"></i> إشعار تجهيز الشحنة ومطابقة المقاسات</h2>
+          <div style="color:#64748b; font-size:0.85rem; margin-top:4px;">مستودع متجر النخبة للأزياء والملابس الفاخرة | قسم مراقبة الجودة والفرز</div>
+        </div>
+        <div class="packing-barcode-box">
+          <div style="font-size:1.2rem; font-weight:900; letter-spacing:2px;" id="slip-order-num">ELITE-XXXXXX</div>
+          <div style="font-size:0.75rem; color:#64748b;">تاريخ الأمر: <span id="slip-date">--/--/----</span></div>
+        </div>
+      </div>
+
+      <!-- Recipient & Dispatch Info -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0; font-size:0.85rem; margin-bottom:16px;">
+        <div>
+          <strong>العميل المستلم:</strong> <span id="slip-cust-name">-</span><br>
+          <strong>رقم الجوال:</strong> <span id="slip-cust-phone" style="direction:ltr; display:inline-block;">-</span><br>
+          <strong>مدينة التوصيل:</strong> <span id="slip-cust-city">-</span>
+        </div>
+        <div>
+          <strong>العنوان التفصيلي:</strong> <span id="slip-cust-address">-</span><br>
+          <strong>طريقة الدفع:</strong> <span id="slip-payment-method">-</span><br>
+          <strong>حالة الطلب:</strong> <span id="slip-order-status" style="font-weight:700; color:#2563eb;">قيد التجهيز</span>
+        </div>
+      </div>
+
+      <!-- Packing Items Table -->
+      <table class="packing-table">
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>القطعة / الموديل</th>
+            <th style="width:110px;">المقاس المطلوب</th>
+            <th style="width:100px;">اللون</th>
+            <th style="width:70px;">الكمية</th>
+            <th style="width:90px;" class="no-print">المطابقة</th>
+          </tr>
+        </thead>
+        <tbody id="slip-items-body">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+
+      <!-- Quality & Dispatch Checklist -->
+      <div style="background:#f1f5f9; padding:12px 16px; border-radius:8px; border:1px dashed #94a3b8; font-size:0.82rem; margin:14px 0;">
+        <strong style="display:block; margin-bottom:6px; color:#0f172a;"><i class="fa-solid fa-clipboard-check"></i> تعليمات موظف تجهيز الأزياء بالمستودع:</strong>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <div><input type="checkbox" checked> فحص سلامة خيوط الخياطة والأزرار</div>
+          <div><input type="checkbox" checked> التأكد من مطابقة مقاس القطعة مع ملصق العلبة</div>
+          <div><input type="checkbox" checked> وضع غطاء الحماية القماشي والكيس الفاخر</div>
+          <div><input type="checkbox" checked> إرفاق كرت العناية وبطاقة الضمان الذهبي</div>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;" class="no-print">
+        <button class="btn btn-secondary" onclick="app.closeModal('admin-packing-slip-modal')">إغلاق</button>
+        <button class="btn btn-primary" onclick="window.print()" style="background:#0f172a; border-color:#0f172a;">
+          <i class="fa-solid fa-print"></i> طباعة بوليصة التجهيز (A4)
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ADMIN ADD/EDIT CATEGORY MODAL -->
+  <div class="modal" id="admin-category-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-category-modal')"></div>
+    <div class="modal-content" style="max-width: 480px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-category-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2 id="category-modal-title"><i class="fa-solid fa-layer-group"></i> إضافة تصنيف جديد</h2>
+      <form onsubmit="app.handleSaveCategory(event)" class="admin-form" style="margin-top:16px;">
+        <input type="hidden" id="admin-cat-id">
+        <div class="form-group">
+          <label>اسم التصنيف (بالعربية) *</label>
+          <input type="text" id="admin-cat-name-ar" required placeholder="مثال: هواتف ذكية">
+        </div>
+        <div class="form-group">
+          <label>اسم التصنيف (بالإنجليزية) *</label>
+          <input type="text" id="admin-cat-name-en" required placeholder="مثال: Smartphones">
+        </div>
+        <div class="form-group">
+          <label>رمز التصنيف المرجعي (Slug) *</label>
+          <input type="text" id="admin-cat-slug" required placeholder="مثال: smartphones" style="direction:ltr; text-align:left;">
+        </div>
+        <div class="form-group">
+          <label>أيقونة FontAwesome *</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input type="text" id="admin-cat-icon" required value="fa-tag" placeholder="fa-tag, fa-mobile-screen, fa-gem..." style="direction:ltr; text-align:left; flex:1;" oninput="document.getElementById('cat-icon-preview').className = 'fa-solid ' + this.value">
+            <span style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; background:var(--bg-light); border-radius:8px; font-size:1.2rem;">
+              <i id="cat-icon-preview" class="fa-solid fa-tag"></i>
+            </span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-floppy-disk"></i> حفظ التصنيف</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN CLEAN PRODUCTION DB CONFIRMATION MODAL -->
+  <div class="modal" id="admin-clean-db-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-clean-db-modal')"></div>
+    <div class="modal-content" style="max-width: 500px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-clean-db-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="width:60px; height:60px; background:rgba(239,68,68,0.1); color:var(--danger); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:1.8rem; margin-bottom:12px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <h2 style="color:var(--danger); margin:0;">تهيئة قاعدة بيانات إنتاجية نظيفة</h2>
+        <p style="color:var(--text-light); font-size:0.9rem; margin-top:6px;">تحذير: هذا الإجراء مخصص لإطلاق المتجر الفعلي وسيقوم بحذف جميع الطلبات والمستخدمين التجريبيين</p>
+      </div>
+
+      <div style="background:var(--bg-light); padding:14px; border-radius:8px; font-size:0.88rem; line-height:1.6; margin-bottom:16px;">
+        <ul style="padding-right:20px; margin:0;">
+          <li>سيتم مسح جميع الطلبات والمشتريات التجريبية.</li>
+          <li>سيتم مسح جميع المستخدمين التجريبيين والإبقاء على حساب المشرف فقط.</li>
+          <li>سيتم الحفاظ على التصنيفات والإعدادات الأساسية النظيفة.</li>
+        </ul>
+      </div>
+
+      <form onsubmit="app.handleInitCleanProduction(event)">
+        <div class="form-group">
+          <label>كلمة مرور المشرف الجديد (admin@elite.com) *</label>
+          <input type="password" id="clean-db-admin-password" required value="admin123" placeholder="أدخل كلمة مرور المشرف">
+        </div>
+        <div class="form-group">
+          <label>لتأكيد العملية، يرجى كتابة كلمة "<strong>تأكيد</strong>" أدناه: *</label>
+          <input type="text" id="clean-db-confirm-text" required placeholder="تأكيد">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="app.closeModal('admin-clean-db-modal')">إلغاء</button>
+          <button type="submit" class="btn btn-primary" style="flex:1; background:var(--danger); border-color:var(--danger);"><i class="fa-solid fa-rocket"></i> تأكيد وتهيئة الإنتاج</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN ADD USER MODAL (إضافة عميل جديد) -->
+  <div class="modal" id="admin-new-user-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-new-user-modal')"></div>
+    <div class="modal-content" style="max-width: 520px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-new-user-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-user-plus" style="color:var(--primary);"></i> إضافة عميل أو مستخدم جديد</h2>
+      <p style="color:var(--text-light); font-size:0.85rem; margin-top:4px;">تسجيل بيانات العميل أو المشرف مباشرة في قاعدة البيانات</p>
+      <form onsubmit="app.handleSaveNewUser(event)" class="admin-form" style="margin-top:16px;">
+        <div class="form-group">
+          <label>الاسم الكامل *</label>
+          <input type="text" id="new-user-name" required placeholder="مثال: محمد عبدالله الشريف">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>البريد الإلكتروني *</label>
+            <input type="email" id="new-user-email" required placeholder="name@example.com">
+          </div>
+          <div class="form-group">
+            <label>رقم الجوال *</label>
+            <input type="tel" id="new-user-phone" placeholder="05XXXXXXXX">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>العنوان والمدينة</label>
+          <input type="text" id="new-user-address" placeholder="مثال: حي الياسمين، الرياض">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>صلاحية الحساب *</label>
+            <select id="new-user-role">
+              <option value="customer" selected>عميل متجر (Customer)</option>
+              <option value="admin">مشرف إدارة (Admin)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>كلمة المرور الافتراضية</label>
+            <input type="password" id="new-user-pass" value="12345678" placeholder="12345678">
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="app.closeModal('admin-new-user-modal')">إلغاء</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;"><i class="fa-solid fa-check"></i> حفظ وإضافة العميل</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN ORDER DETAILS MODAL (نافذة تفاصيل الطلب المتكاملة) -->
+  <div class="modal" id="admin-order-details-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-order-details-modal')"></div>
+    <div class="modal-content" style="max-width: 680px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-order-details-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
+        <div>
+          <h2 style="margin:0; font-size:1.35rem;" id="modal-order-title"><i class="fa-solid fa-receipt" style="color:var(--primary);"></i> تفاصيل الطلب: #ORD-00000</h2>
+          <span style="font-size:0.8rem; color:var(--text-light);" id="modal-order-date">تاريخ التسجيل: --/--/----</span>
+        </div>
+        <span class="status-badge" id="modal-order-badge">قيد المراجعة</span>
+      </div>
+
+      <!-- Quick Status & Action Buttons -->
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg); padding:10px 14px; border-radius:8px; margin-bottom:16px; border:1px solid var(--border);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <label style="font-size:0.85rem; font-weight:700;"><i class="fa-solid fa-rotate"></i> تعديل الحالة:</label>
+          <select id="modal-order-status-select" style="padding:5px 10px; font-size:0.85rem; border-radius:6px; border:1px solid var(--border); background:#fff;" onchange="app.handleModalOrderStatusChange(this.value)">
+            <option value="pending">قيد المراجعة</option>
+            <option value="processing">جاري التجهيز</option>
+            <option value="shipped">تم الشحن</option>
+            <option value="delivered">تم التوصيل</option>
+            <option value="cancelled">ملغي</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.82rem;" onclick="app.printCurrentOrderInvoice()"><i class="fa-solid fa-file-invoice"></i> الفاتورة الرسمية</button>
+          <button class="btn btn-primary" style="padding:6px 12px; font-size:0.82rem;" onclick="app.printCurrentOrderSlip()"><i class="fa-solid fa-boxes-packing"></i> بوليصة التجهيز</button>
+        </div>
+      </div>
+
+      <!-- Customer & Shipping Grid -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px; font-size:0.88rem;">
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px;">
+          <strong style="color:var(--dark); display:block; margin-bottom:6px;"><i class="fa-solid fa-user"></i> بيانات العميل:</strong>
+          <div><strong>الاسم:</strong> <span id="modal-order-cust-name">-</span></div>
+          <div><strong>الجوال:</strong> <span id="modal-order-cust-phone" style="direction:ltr; display:inline-block;">-</span></div>
+          <div><strong>البريد:</strong> <span id="modal-order-cust-email">-</span></div>
+        </div>
+        <div style="background:#fff; border:1px solid var(--border); border-radius:8px; padding:12px;">
+          <strong style="color:var(--dark); display:block; margin-bottom:6px;"><i class="fa-solid fa-truck"></i> تفاصيل التوصيل والدفع:</strong>
+          <div><strong>المدينة:</strong> <span id="modal-order-city">-</span></div>
+          <div><strong>العنوان:</strong> <span id="modal-order-address">-</span></div>
+          <div><strong>طريقة الدفع:</strong> <span id="modal-order-payment">-</span></div>
+        </div>
+      </div>
+
+      <!-- Ordered Items List -->
+      <div style="margin-bottom:16px;">
+        <strong style="display:block; margin-bottom:8px; font-size:0.92rem;"><i class="fa-solid fa-bag-shopping"></i> المنتجات المطلوبة مع المقاس واللون:</strong>
+        <div class="table-responsive">
+          <table class="admin-table" style="font-size:0.85rem;">
+            <thead>
+              <tr>
+                <th>القطعة</th>
+                <th>المقاس المختار</th>
+                <th>اللون</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>الإجمالي</th>
+              </tr>
+            </thead>
+            <tbody id="modal-order-items-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Financial Totals Summary -->
+      <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.88rem;">
+          <span>المجموع الفرعي:</span>
+          <span id="modal-order-subtotal">$0.00</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:0.88rem; color:var(--success);">
+          <span>الخصم والكوبون (<span id="modal-order-coupon">-</span>):</span>
+          <span id="modal-order-discount">-$0.00</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.88rem;">
+          <span>رسوم الشحن والتوصيل:</span>
+          <span id="modal-order-shipping">$0.00</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; font-size:1.15rem; font-weight:800; border-top:1px dashed var(--border); padding-top:6px; color:var(--primary);">
+          <span>المبلغ الإجمالي المدفوع:</span>
+          <span id="modal-order-total">$0.00</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button type="button" class="btn btn-secondary" onclick="app.closeModal('admin-order-details-modal')">إغلاق النافذة</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN CUSTOMER ORDER HISTORY MODAL (سجل طلبات العميل) -->
+  <div class="modal" id="admin-user-history-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-user-history-modal')"></div>
+    <div class="modal-content" style="max-width: 650px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-user-history-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <div style="border-bottom:1px solid var(--border); padding-bottom:12px; margin-bottom:16px;">
+        <h2 style="margin:0; font-size:1.35rem;" id="modal-history-title"><i class="fa-solid fa-clock-rotate-left" style="color:var(--primary);"></i> سجل طلبات العميل</h2>
+        <span style="font-size:0.85rem; color:var(--text-light);" id="modal-history-subtitle">عرض كافة المعاملات والمشتريات السابقة</span>
+      </div>
+      <div id="modal-history-stats" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;">
+        <!-- Dynamically injected summary -->
+      </div>
+      <div class="table-responsive">
+        <table class="admin-table" style="font-size:0.85rem;">
+          <thead>
+            <tr>
+              <th>رقم الطلب</th>
+              <th>التاريخ</th>
+              <th>القطع</th>
+              <th>المبلغ</th>
+              <th>الحالة</th>
+              <th>عرض</th>
+            </tr>
+          </thead>
+          <tbody id="modal-history-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE CHAT SUPPORT WIDGET -->
+  <div class="chat-widget-fab" id="chat-widget-btn" onclick="app.toggleChatWindow()" title="محادثة الدعم الفني المباشر">
+    <i class="fa-solid fa-headset"></i>
+    <div class="chat-fab-badge"></div>
+  </div>
+
+  <div class="chat-window" id="chat-widget-window">
+    <div class="chat-header">
+      <div class="chat-agent-info">
+        <div class="chat-agent-avatar"><i class="fa-solid fa-user-tie"></i></div>
+        <div>
+          <strong style="display:block; font-size:0.95rem;">مساعد النخبة الذكي</strong>
+          <span style="font-size:0.75rem; color:#86efac;"><i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> متصل وجاهز لمساعدتك</span>
+        </div>
+      </div>
+      <button class="btn-text" onclick="app.toggleChatWindow()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="chat-body" id="chat-messages-body">
+      <div class="chat-msg bot">
+        مرحباً بك في متجر النخبة! 👋 أنا مساعدك الذكي، كيف يمكنني خدمتك اليوم؟ يمكنك اختيار أحد الأسئلة السريعة أدناه أو كتابة استفسارك:
+      </div>
+      <div class="chat-chips-row" id="chat-quick-chips">
+        <button class="chat-chip" onclick="app.handleQuickChip('ما هي مدة ورسوم التوصيل؟')">🚚 مدة ورسوم التوصيل</button>
+        <button class="chat-chip" onclick="app.handleQuickChip('ما هي طرق الدفع المتاحة؟')">💳 طرق الدفع</button>
+        <button class="chat-chip" onclick="app.handleQuickChip('هل يوجد كوبونات خصم متاحة؟')">🏷️ كوبونات الخصم</button>
+        <button class="chat-chip" onclick="app.handleQuickChip('كيف أقوم بتتبع طلبي؟')">📦 تتبع طلبي</button>
+        <button class="chat-chip" onclick="app.handleQuickChip('ما هي سياسة الاسترجاع والضمان؟')">↩️ سياسة الاسترجاع</button>
+      </div>
+    </div>
+
+    <form class="chat-footer" onsubmit="app.handleSendChatMessage(event)">
+      <input type="text" id="chat-input-text" class="chat-input" placeholder="اكتب سؤالك هنا..." required autocomplete="off">
+      <button type="submit" class="chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+    </form>
+  </div>
+
+  <!-- SPOTLIGHT COMMAND PALETTE MODAL (Ctrl + K) -->
+  <div class="modal" id="admin-command-palette">
+    <div class="modal-overlay" onclick="app.closeCommandPalette()"></div>
+    <div class="command-palette-card">
+      <div class="command-search-header">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="command-palette-input" placeholder="ابحث عن صفحة، منتج، رقم طلب أو إجراء سريع..." autocomplete="off" oninput="app.filterCommandPalette(this.value)" onkeydown="app.handleCommandKeyDown(event)">
+        <span class="command-kbd-badge">ESC للخروج</span>
+      </div>
+      <div class="command-palette-results" id="command-palette-results">
+        <!-- Dynamic Results Injected -->
+      </div>
+      <div class="command-palette-footer">
+        <div><span>استخدم <kbd>↑</kbd> <kbd>↓</kbd> للتنقل و <kbd>Enter</kbd> للتنفيذ الفوري</span></div>
+        <div><span>لوحة القيادة الذكية v3.0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN BULK STOCK UPDATE MODAL -->
+  <div class="modal" id="admin-bulk-stock-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-bulk-stock-modal')"></div>
+    <div class="modal-content" style="max-width: 480px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-bulk-stock-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-boxes-stacked" style="color:var(--primary);"></i> تعديل المخزون بالجملة</h2>
+      <p style="color:var(--text-light); font-size:0.85rem; margin-top:4px;">تطبيق كمية مخزون جديدة على كافة المنتجات المحددة (<span id="bulk-stock-prod-count">0</span> منتج)</p>
+      <form onsubmit="app.handleSaveBulkStock(event)" style="margin-top:16px;">
+        <div class="form-group">
+          <label>نوع التعديل:</label>
+          <select id="bulk-stock-mode" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border);">
+            <option value="set">تعيين كمية موحدة جديدة</option>
+            <option value="add">إضافة كمية إلى المخزون الحالي (+)</option>
+            <option value="subtract">إنقاص كمية من المخزون الحالي (-)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>الكمية (قطع) *</label>
+          <input type="number" id="bulk-stock-qty" min="0" required value="20" style="width:100%;">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="app.closeModal('admin-bulk-stock-modal')">إلغاء</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;"><i class="fa-solid fa-check"></i> تطبيق التعديل للمحددة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN BULK PRICE ADJUSTMENT MODAL -->
+  <div class="modal" id="admin-bulk-price-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-bulk-price-modal')"></div>
+    <div class="modal-content" style="max-width: 480px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-bulk-price-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-percent" style="color:var(--primary);"></i> تعديل الأسعار بالنسبة المئوية</h2>
+      <p style="color:var(--text-light); font-size:0.85rem; margin-top:4px;">زيادة أو تخفيض أسعار المنتجات المحددة بنسبة مئوية (<span id="bulk-price-prod-count">0</span> منتج)</p>
+      <form onsubmit="app.handleSaveBulkPrice(event)" style="margin-top:16px;">
+        <div class="form-group">
+          <label>نوع العملية:</label>
+          <select id="bulk-price-action" style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border);">
+            <option value="discount">تخفيض / خصم بنسبة مئوية (-%)</option>
+            <option value="increase">زيادة بنسبة مئوية (+%)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>النسبة المئوية (%) *</label>
+          <input type="number" id="bulk-price-percent" min="1" max="90" required value="10" style="width:100%;">
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="app.closeModal('admin-bulk-price-modal')">إلغاء</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;"><i class="fa-solid fa-check"></i> تطبيق الخصم/الزيادة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN BULK CATEGORY MOVE MODAL -->
+  <div class="modal" id="admin-bulk-category-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-bulk-category-modal')"></div>
+    <div class="modal-content" style="max-width: 480px;">
+      <button class="close-btn modal-close" onclick="app.closeModal('admin-bulk-category-modal')"><i class="fa-solid fa-xmark"></i></button>
+      <h2><i class="fa-solid fa-folder-tree" style="color:var(--primary);"></i> نقل المنتجات إلى تصنيف آخر</h2>
+      <p style="color:var(--text-light); font-size:0.85rem; margin-top:4px;">نقل جماعي لكافة المنتجات المحددة إلى قسم جديد</p>
+      <form onsubmit="app.handleSaveBulkCategory(event)" style="margin-top:16px;">
+        <div class="form-group">
+          <label>اختر القسم المستهدف: *</label>
+          <select id="bulk-target-category" required style="width:100%; padding:8px 12px; border-radius:8px; border:1px solid var(--border);">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn btn-secondary" style="flex:1;" onclick="app.closeModal('admin-bulk-category-modal')">إلغاء</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;"><i class="fa-solid fa-arrows-turn-right"></i> نقل المنتجات المحددة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- OFFICIAL ZATCA TAX INVOICE MODAL -->
+  <div class="modal" id="admin-invoice-modal">
+    <div class="modal-overlay" onclick="app.closeModal('admin-invoice-modal')"></div>
+    <div class="modal-content invoice-modal-content">
+      <button class="close-btn modal-close no-print" onclick="app.closeModal('admin-invoice-modal')"><i class="fa-solid fa-xmark"></i></button>
+
+      <div class="invoice-header-box">
+        <div>
+          <h2 style="margin:0; font-size:1.6rem; color:#0f172a; display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-receipt" style="color:var(--primary);"></i> فاتورة ضريبية مبسطة
+          </h2>
+          <div style="font-size:0.88rem; color:#64748b; margin-top:4px;">متجر النخبة الفاخر المحدود | المملكة العربية السعودية</div>
+          <div style="font-size:0.85rem; color:#0f172a; margin-top:2px;"><strong>الرقم الضريبي (VAT):</strong> 310294857200003</div>
+          <div style="font-size:0.85rem; color:#0f172a;"><strong>السجل التجاري:</strong> 1010884920</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="invoice-qr-box">
+            <i class="fa-solid fa-qrcode" style="font-size:3.5rem; color:#0f172a;"></i>
+          </div>
+          <div style="font-size:0.75rem; color:#64748b; margin-top:4px;">معتمد ومطابق لـ ZATCA</div>
+        </div>
+      </div>
+
+      <div class="invoice-meta-grid">
+        <div>
+          <div><strong>رقم الفاتورة:</strong> <span id="inv-num">INV-00000</span></div>
+          <div><strong>تاريخ الإصدار:</strong> <span id="inv-date">--/--/----</span></div>
+          <div><strong>حالة الدفع:</strong> <span id="inv-pay-status" style="font-weight:700; color:#10b981;">مدفوع بالكامل</span></div>
+          <div><strong>طريقة السداد:</strong> <span id="inv-pay-method">-</span></div>
+        </div>
+        <div>
+          <div><strong>اسم العميل:</strong> <span id="inv-cust-name">-</span></div>
+          <div><strong>رقم الجوال:</strong> <span id="inv-cust-phone" style="direction:ltr; display:inline-block;">-</span></div>
+          <div><strong>المدينة والتوصيل:</strong> <span id="inv-cust-city">-</span></div>
+          <div><strong>العنوان:</strong> <span id="inv-cust-address">-</span></div>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>البيان والسلعة</th>
+            <th>المقاس واللون</th>
+            <th>الكمية</th>
+            <th>السعر غير شامل الضريبة</th>
+            <th>الضريبة (15%)</th>
+            <th>المجموع شامل الضريبة</th>
+          </tr>
+        </thead>
+        <tbody id="inv-items-body">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+
+      <div class="invoice-summary-box">
+        <div class="invoice-summary-line">
+          <span>المجموع الخاضع للضريبة:</span>
+          <span id="inv-subtotal">$0.00</span>
+        </div>
+        <div class="invoice-summary-line" style="color:#10b981;">
+          <span>الخصم الممنوح (<span id="inv-coupon">لا يوجد</span>):</span>
+          <span id="inv-discount">-$0.00</span>
+        </div>
+        <div class="invoice-summary-line">
+          <span>رسوم الشحن والتوصيل:</span>
+          <span id="inv-shipping">$0.00</span>
+        </div>
+        <div class="invoice-summary-line">
+          <span>ضريبة القيمة المضافة (15%):</span>
+          <span id="inv-tax">$0.00</span>
+        </div>
+        <div class="invoice-summary-line invoice-summary-total">
+          <span>المبلغ الإجمالي المستحق:</span>
+          <span id="inv-total">$0.00</span>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:24px;" class="no-print">
+        <button class="btn btn-secondary" onclick="app.closeModal('admin-invoice-modal')">إغلاق</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-primary" onclick="window.print()" style="background:#0f172a; border-color:#0f172a;">
+            <i class="fa-solid fa-print"></i> طباعة الفاتورة الضريبية (A4)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification System Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

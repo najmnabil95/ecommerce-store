@@ -1,0 +1,27 @@
+# Laravel and PHP
+laravel/vendor/
+laravel/node_modules/
+laravel/.env
+laravel/.env.backup
+laravel/.env.production
+laravel/storage/*.key
+laravel/storage/logs/*.log
+laravel/public/storage
+laravel/public/hot
+laravel/public/build
+laravel/.phpunit.cache
+laravel/.phpunit.result.cache
+
+# Environment and Logs
+*.log
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+.vscode/
+.cursor/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
