@@ -200,6 +200,29 @@ class OrderController extends Controller
             'items' => 'required|array|min:1',
         ]);
 
+        // Stock availability verification: Ensure all ordered items are in stock
+        foreach ($validated['items'] as $it) {
+            if (isset($it['id'])) {
+                $p = Product::find($it['id']);
+                $itemName = $p?->name_ar ?? ($it['name_ar'] ?? ($it['title'] ?? 'منتج'));
+                $requestedQty = (int) ($it['quantity'] ?? 1);
+
+                if (!$p || $p->stock <= 0) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "نعتذر منك، لقد نفدت كمية المنتج '{$itemName}' بالكامل (الكمية مخلصة) ولا يمكن إتمام الطلب.",
+                    ], 422);
+                }
+
+                if ($p->stock < $requestedQty) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "عذراً، الكمية المتوفرة حالياً في المستودع من '{$itemName}' هي {$p->stock} قطع فقط. يرجى تعديل الكمية في حقيبة التسوق.",
+                    ], 422);
+                }
+            }
+        }
+
         $orderNumber = 'ORD-' . rand(10000, 99999);
         $userId = $request->user('sanctum')?->id ?? $request->user()?->id ?? null;
 
@@ -222,12 +245,14 @@ class OrderController extends Controller
             'items_json' => $validated['items'],
         ]);
 
-        // Decrement stock for purchased items
+        // Decrement stock for purchased items safely
         foreach ($validated['items'] as $it) {
             if (isset($it['id'])) {
                 $p = Product::find($it['id']);
                 if ($p) {
-                    $p->decrement('stock', $it['quantity'] ?? 1);
+                    $qty = (int) ($it['quantity'] ?? 1);
+                    $newStock = max(0, $p->stock - $qty);
+                    $p->update(['stock' => $newStock]);
                 }
             }
         }

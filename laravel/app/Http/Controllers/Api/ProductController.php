@@ -156,7 +156,9 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $data = [];
-        if ($request->has('stock')) {
+        if ($request->has('delta')) {
+            $data['stock'] = max(0, (int) $product->stock + (int) $request->input('delta'));
+        } elseif ($request->has('stock')) {
             $data['stock'] = max(0, (int) $request->input('stock'));
         }
         if ($request->has('price')) {
@@ -170,7 +172,7 @@ class ProductController extends Controller
         return response()->json([
             'success' => true,
             'data' => $product,
-            'message' => 'تم التحديث السريع بنجاح',
+            'message' => 'تم تحديث المخزون والبيانات بنجاح',
         ]);
     }
 

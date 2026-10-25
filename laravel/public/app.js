@@ -238,8 +238,15 @@ const app = {
     grid.innerHTML = list.map(p => {
       const isWish = this.wishlist.some(w => w.id === p.id);
       const origPriceHtml = p.original_price ? `<span class="original-price">$${p.original_price.toFixed(2)}</span>` : '';
-      const badgeHtml = p.badge ? `<span class="product-badge">${p.badge}</span>` : '';
-      const outOfStock = p.stock <= 0;
+      const outOfStock = (p.stock <= 0);
+      let badgeHtml = '';
+      if (outOfStock) {
+        badgeHtml = `<span class="product-badge out-of-stock-badge"><i class="fa-solid fa-triangle-exclamation"></i> الكمية مخلصة</span>`;
+      } else if (p.stock <= 3) {
+        badgeHtml = `<span class="product-badge stock-urgency-badge"><i class="fa-solid fa-fire"></i> باقي ${p.stock} فقط!</span>`;
+      } else if (p.badge) {
+        badgeHtml = `<span class="product-badge">${p.badge}</span>`;
+      }
 
       // Fashion Color Dots
       const colorsList = Array.isArray(p.colors) ? p.colors : [];
@@ -267,7 +274,7 @@ const app = {
       ` : '';
 
       return `
-        <div class="product-card">
+        <div class="product-card ${outOfStock ? 'out-of-stock-card' : ''}">
           <div class="product-image-wrap">
             ${badgeHtml}
             <button class="wishlist-btn ${isWish ? 'active' : ''}" onclick="app.toggleWishlist(${p.id})">
@@ -275,7 +282,7 @@ const app = {
             </button>
             <img src="${p.image_url}" alt="${p.name_ar}" class="product-img" onclick="app.quickView(${p.id})">
             <button class="quick-view-btn" onclick="app.quickView(${p.id})">
-              <i class="fa-solid fa-eye"></i> استعراض وتحديد المقاس
+              <i class="fa-solid fa-eye"></i> ${outOfStock ? 'معاينة القطعة (مخلصة)' : 'استعراض وتحديد المقاس'}
             </button>
           </div>
           <div class="product-info">
@@ -294,8 +301,8 @@ const app = {
                 <span class="current-price">$${p.price.toFixed(2)}</span>
                 ${origPriceHtml}
               </div>
-              <button class="add-to-cart-btn ${outOfStock ? 'disabled' : ''}" ${outOfStock ? 'disabled' : ''} onclick="app.quickView(${p.id})">
-                <i class="fa-solid fa-bag-shopping"></i> ${outOfStock ? 'نفد' : 'اختر المقاس'}
+              <button class="add-to-cart-btn ${outOfStock ? 'disabled' : ''}" ${outOfStock ? 'disabled' : ''} onclick="${outOfStock ? `event.stopPropagation(); app.showToast('نعتذر منك، لقد نفدت كمية هذا المنتج بالكامل (الكمية مخلصة)!', 'danger');` : `app.quickView(${p.id})`}">
+                ${outOfStock ? '<i class="fa-solid fa-ban"></i> الكمية مخلصة' : '<i class="fa-solid fa-bag-shopping"></i> اختر المقاس'}
               </button>
             </div>
           </div>
@@ -415,7 +422,7 @@ const app = {
     if (!prod) return;
 
     if (prod.stock <= 0) {
-      this.showToast('عذراً، هذه القطعة غير متوفرة حالياً في المخزون', 'danger');
+      this.showToast(`نعتذر منك، لقد نفدت كمية "${prod.name_ar}" بالكامل (الكمية مخلصة)! ⛔`, 'danger');
       return;
     }
 
@@ -426,7 +433,7 @@ const app = {
     const exist = this.cart.find(c => (c.cartKey === cartKey) || (!c.cartKey && c.id === id));
     if (exist) {
       if (exist.quantity >= prod.stock) {
-        this.showToast(`الكمية المتاحة في المخزون هي ${prod.stock} فقط`, 'danger');
+        this.showToast(`عذراً، أقصى كمية يمكنك طلبها من "${prod.name_ar}" هي ${prod.stock} قطع فقط المتوفرة في المخزون!`, 'warning');
         return;
       }
       exist.quantity += 1;
@@ -1649,15 +1656,17 @@ const app = {
           <td><div style="display:flex; gap:3px; flex-wrap:wrap;">${sizesTags}</div></td>
           <td>
             <div class="inline-stock-box">
-              <button type="button" class="inline-stock-btn" onclick="app.quickAdjustStock(${p.id}, -1)" title="إنقاص قطعة">-</button>
-              <span class="inline-stock-val ${p.stock <= 5 ? (p.stock === 0 ? 'out-stock' : 'low-stock') : ''}" id="stock-val-${p.id}">${p.stock}</span>
-              <button type="button" class="inline-stock-btn" onclick="app.quickAdjustStock(${p.id}, 1)" title="زيادة قطعة">+</button>
+              <button type="button" class="inline-stock-btn" onclick="app.quickAdjustStock(${p.id}, -1)" title="إنقاص قطعة واحدة">-</button>
+              <span class="inline-stock-val ${p.stock <= 5 ? (p.stock === 0 ? 'out-stock' : 'low-stock') : 'in-stock'}" id="stock-val-${p.id}" onclick="app.promptSetStock(${p.id}, ${p.stock}, '${(p.name_ar || '').replace(/'/g, "\\'")}')" title="انقر لتسجيل عدد القطع بدقة">
+                ${p.stock === 0 ? '0 (مخلصة)' : (p.stock <= 5 ? `${p.stock} (منخفض)` : `${p.stock} قطعة`)}
+              </span>
+              <button type="button" class="inline-stock-btn" onclick="app.quickAdjustStock(${p.id}, 1)" title="زيادة قطعة واحدة">+</button>
             </div>
           </td>
           <td>${p.badge ? `<span class="badge" style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:10px; font-size:0.75rem; font-weight:700;">${p.badge}</span>` : '<span style="color:var(--text-light); font-size:0.8rem;">-</span>'}</td>
           <td>
             <div style="display:flex; gap:6px;">
-              <button class="btn btn-secondary" style="padding:5px 9px; font-size:0.82rem;" onclick="app.editProduct(${p.id})" title="تعديل القطعة">
+              <button class="btn btn-secondary" style="padding:5px 9px; font-size:0.82rem;" onclick="app.editProduct(${p.id})" title="تعديل القطعة والمخزون">
                 <i class="fa-solid fa-pen"></i>
               </button>
               <button class="btn btn-secondary" style="padding:5px 9px; font-size:0.82rem; color:var(--danger);" onclick="app.deleteProduct(${p.id})" title="حذف القطعة">
@@ -1668,6 +1677,108 @@ const app = {
         </tr>
       `;
     }).join('');
+  },
+
+  // INVENTORY QUICK ADJUSTMENT & STOCK MANAGEMENT
+  quickAdjustStock: async function(productId, delta) {
+    const prod = this.products.find(p => p.id === productId);
+    if (!prod) return;
+    const newStock = Math.max(0, (prod.stock || 0) + delta);
+    prod.stock = newStock;
+
+    // Optimistically update badge in UI
+    const valEl = document.getElementById(`stock-val-${productId}`);
+    if (valEl) {
+      valEl.innerText = newStock === 0 ? '0 (مخلصة)' : (newStock <= 5 ? `${newStock} (منخفض)` : `${newStock} قطعة`);
+      valEl.className = `inline-stock-val ${newStock <= 5 ? (newStock === 0 ? 'out-stock' : 'low-stock') : 'in-stock'}`;
+    }
+
+    try {
+      const res = await fetch(`/api/products/${productId}/quick-update`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ delta })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (newStock === 0) {
+          this.showToast(`⚠️ تنبيه: نفدت كمية "${prod.name_ar}" بالكامل (الكمية مخلصة)!`, 'warning');
+        } else {
+          this.showToast(`تم تحديث مخزون "${prod.name_ar}": أصبح ${newStock} قطعة 📦`, 'success');
+        }
+        await this.loadAdminStats();
+      }
+    } catch (e) {
+      this.showToast('تعذر تحديث المخزون في الخادم', 'danger');
+    }
+  },
+
+  promptSetStock: async function(productId, currentStock, prodName) {
+    const input = prompt(`أدخل عدد القطع المتوفرة حالياً في المستودع لمنتج:\n"${prodName}"`, currentStock);
+    if (input === null) return;
+    const newStock = parseInt(input.trim(), 10);
+    if (isNaN(newStock) || newStock < 0) {
+      this.showToast('يرجى إدخال عدد قطع صحيح (صفر أو أكثر)', 'warning');
+      return;
+    }
+
+    const prod = this.products.find(p => p.id === productId);
+    if (prod) prod.stock = newStock;
+
+    const valEl = document.getElementById(`stock-val-${productId}`);
+    if (valEl) {
+      valEl.innerText = newStock === 0 ? '0 (مخلصة)' : (newStock <= 5 ? `${newStock} (منخفض)` : `${newStock} قطعة`);
+      valEl.className = `inline-stock-val ${newStock <= 5 ? (newStock === 0 ? 'out-stock' : 'low-stock') : 'in-stock'}`;
+    }
+
+    try {
+      const res = await fetch(`/api/products/${productId}/quick-update`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ stock: newStock })
+      });
+      const data = await res.json();
+      if (data.success) {
+        if (newStock === 0) {
+          this.showToast(`⚠️ تم تسجيل الكمية كـ (مخلصة / 0 قطع) لـ "${prodName}"`, 'warning');
+        } else {
+          this.showToast(`تم تسجيل المخزون بنجاح: ${newStock} قطعة لـ "${prodName}" 📦`, 'success');
+        }
+        await this.loadAdminStats();
+      }
+    } catch (e) {
+      this.showToast('تعذر حفظ كمية المخزون في الخادم', 'danger');
+    }
+  },
+
+  filterAdminProductsTable: function() {
+    const search = (document.getElementById('admin-product-search')?.value || '').trim().toLowerCase();
+    const cat = document.getElementById('admin-product-cat-filter')?.value || 'all';
+    const stockFilter = document.getElementById('admin-product-stock-filter')?.value || 'all';
+
+    let list = [...(this.products || [])];
+
+    if (cat !== 'all') {
+      list = list.filter(p => p.category_id == cat || p.category_slug == cat);
+    }
+
+    if (stockFilter === 'low') {
+      list = list.filter(p => p.stock > 0 && p.stock <= 5);
+    } else if (stockFilter === 'out') {
+      list = list.filter(p => p.stock === 0);
+    } else if (stockFilter === 'available') {
+      list = list.filter(p => p.stock > 5);
+    }
+
+    if (search) {
+      list = list.filter(p => 
+        (p.name_ar && p.name_ar.toLowerCase().includes(search)) ||
+        (p.name_en && p.name_en.toLowerCase().includes(search)) ||
+        (p.material && p.material.toLowerCase().includes(search))
+      );
+    }
+
+    this.renderAdminProductsTable(list);
   },
 
   // PRODUCT BULK OPERATIONS
@@ -3359,9 +3470,30 @@ const app = {
         ${colorsHtml}
         ${specsHtml}
 
-        <button class="btn btn-primary btn-block" style="margin-bottom: 20px; padding:12px 20px; font-weight:700;" onclick="app.addCurrentQuickViewToCart(); app.closeModal('product-modal')">
-          <i class="fa-solid fa-bag-shopping"></i> أضف إلى حقيبة التسوق
-        </button>
+        <!-- Stock Status Alert Box (حالة المخزون ورسالة نفاذ الكمية) -->
+        ${(p.stock <= 0) ? `
+          <div class="stock-status-alert out-of-stock">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <div>
+              <strong>نعتذر منك، هذا المنتج مخلص (نفدت الكمية بالكامل)</strong>
+              <p>لقد بيعت جميع القطع المسجلة في المستودع لهذا الموديل حالياً. يمكنك متابعة المتجر عند توفر دفعات جديدة.</p>
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-block disabled" disabled style="margin-bottom: 20px; padding:12px 20px; font-weight:700;">
+            <i class="fa-solid fa-ban"></i> نعتذر، نفدت الكمية بالكامل (الكمية مخلصة)
+          </button>
+        ` : `
+          <div class="stock-status-alert in-stock ${p.stock <= 5 ? 'low-stock' : ''}">
+            <i class="fa-solid ${p.stock <= 5 ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i>
+            <div>
+              <strong>${p.stock <= 5 ? `مخزون محدود: باقي ${p.stock} قطع فقط في المستودع!` : `المخزون متوفر: ${p.stock} قطعة جاهزة للشحن الفوري`}</strong>
+              <p>فحص جودة معتمد وضمان استبدال واسترجاع لمدة 14 يوم.</p>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-block" style="margin-bottom: 20px; padding:12px 20px; font-weight:700;" onclick="app.addCurrentQuickViewToCart(); app.closeModal('product-modal')">
+            <i class="fa-solid fa-bag-shopping"></i> أضف إلى حقيبة التسوق
+          </button>
+        `}
 
         <div class="reviews-section">
           <h4>تقييمات العملاء (${p.reviews_count || 0})</h4>

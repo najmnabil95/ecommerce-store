@@ -5268,6 +5268,195 @@ body.dark-mode .outfits-badge {
   }
 }
 
+/* ============================================================
+   INVENTORY MANAGEMENT & OUT-OF-STOCK ALERTS (إدارة المخزون والتنبيهات)
+   ============================================================ */
+.product-card.out-of-stock-card .product-img {
+  filter: grayscale(40%) opacity(0.85);
+}
+
+.product-badge.out-of-stock-badge {
+  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.45) !important;
+  font-weight: 800 !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  letter-spacing: 0.3px;
+}
+
+.product-badge.stock-urgency-badge {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+  font-weight: 800 !important;
+}
+
+.add-to-cart-btn.disabled,
+.btn.disabled {
+  opacity: 0.65;
+  cursor: not-allowed !important;
+  background: #64748b !important;
+  border-color: #64748b !important;
+  color: #f1f5f9 !important;
+  box-shadow: none !important;
+}
+
+/* QUICK VIEW MODAL STOCK ALERT BOXES */
+.stock-status-alert {
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin: 16px 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  animation: fadeIn 0.3s ease;
+}
+
+.stock-status-alert i {
+  font-size: 1.35rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.stock-status-alert strong {
+  display: block;
+  font-size: 0.98rem;
+  margin-bottom: 2px;
+}
+
+.stock-status-alert p {
+  margin: 0;
+  font-size: 0.84rem;
+  opacity: 0.9;
+}
+
+/* OUT OF STOCK STATE (الكمية مخلصة) */
+.stock-status-alert.out-of-stock {
+  background: rgba(239, 68, 68, 0.12);
+  border: 2px solid #ef4444;
+  color: #b91c1c;
+}
+
+[data-theme="dark"] .stock-status-alert.out-of-stock,
+body.dark-mode .stock-status-alert.out-of-stock {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+
+/* IN STOCK STATE (متوفر في المستودع) */
+.stock-status-alert.in-stock {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1.5px solid rgba(16, 185, 129, 0.4);
+  color: #047857;
+}
+
+[data-theme="dark"] .stock-status-alert.in-stock,
+body.dark-mode .stock-status-alert.in-stock {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+/* LOW STOCK WARNING STATE (مخزون وشيك على النفاد) */
+.stock-status-alert.low-stock {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1.5px solid #f59e0b;
+  color: #b45309;
+}
+
+[data-theme="dark"] .stock-status-alert.low-stock,
+body.dark-mode .stock-status-alert.low-stock {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #f59e0b;
+  color: #fcd34d;
+}
+
+/* ADMIN PRODUCTS TABLE INLINE STOCK ADJUSTER */
+.inline-stock-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.inline-stock-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .inline-stock-btn,
+body.dark-mode .inline-stock-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #475569;
+  color: #f1f5f9;
+}
+
+.inline-stock-btn:hover {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  transform: scale(1.1);
+}
+
+.inline-stock-val {
+  min-width: 48px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.88rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .inline-stock-val,
+body.dark-mode .inline-stock-val {
+  background: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+.inline-stock-val:hover {
+  outline: 2px solid var(--primary);
+}
+
+.inline-stock-val.out-stock {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border-color: #f87171 !important;
+  font-weight: 900;
+}
+
+.inline-stock-val.low-stock {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border-color: #fcd34d !important;
+}
+
+.inline-stock-val.in-stock {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border-color: #86efac !important;
+}
+
+
 
 
 
