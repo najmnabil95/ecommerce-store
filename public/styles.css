@@ -5456,6 +5456,515 @@ body.dark-mode .inline-stock-val {
   border-color: #86efac !important;
 }
 
+/* ============================================================
+   STANDALONE COST & BUDGET CALCULATOR (حاسبة التكلفة والوفورات الذكية)
+   ============================================================ */
+.cost-calculator-section {
+  padding: 60px 0 80px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cost-calc-container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.cost-calc-wrapper {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 44px 38px;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.45), 0 0 40px -10px rgba(16, 185, 129, 0.2);
+  backdrop-filter: blur(20px);
+  color: #f8fafc;
+}
+
+[data-theme="light"] .cost-calc-wrapper,
+body:not(.dark-mode) .cost-calc-wrapper {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 20px 45px -10px rgba(16, 185, 129, 0.15), 0 4px 20px rgba(0, 0, 0, 0.04);
+  color: #0f172a;
+}
+
+.cost-calc-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 36px;
+}
+
+.cost-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  padding: 6px 18px;
+  border-radius: 50px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+[data-theme="light"] .cost-badge-pill,
+body:not(.dark-mode) .cost-badge-pill {
+  background: #d1fae5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.cost-calc-header h2 {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+
+.cost-calc-header p {
+  color: #94a3b8;
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+
+[data-theme="light"] .cost-calc-header p,
+body:not(.dark-mode) .cost-calc-header p {
+  color: #64748b;
+}
+
+.cost-calc-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+@media (max-width: 950px) {
+  .cost-calc-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+
+.cost-inputs-col {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.cost-card-box {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 20px 22px;
+  transition: all 0.25s ease;
+}
+
+[data-theme="light"] .cost-card-box,
+body:not(.dark-mode) .cost-card-box {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.cost-card-box label {
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cost-garment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+}
+
+.cost-garment-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  padding: 12px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+[data-theme="light"] .cost-garment-btn,
+body:not(.dark-mode) .cost-garment-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.cost-garment-btn i {
+  font-size: 1.25rem;
+  color: var(--primary);
+}
+
+.cost-garment-btn .garment-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.cost-garment-btn .garment-base-price {
+  font-size: 0.78rem;
+  color: #10b981;
+  font-weight: 800;
+}
+
+.cost-garment-btn:hover {
+  border-color: #10b981;
+  transform: translateY(-2px);
+}
+
+.cost-garment-btn.active {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff !important;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.cost-garment-btn.active i,
+.cost-garment-btn.active .garment-base-price {
+  color: #ffffff !important;
+}
+
+/* Fabric Quality Radio Grid */
+.cost-fabric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 600px) {
+  .cost-fabric-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cost-fabric-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: inherit;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: right;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+[data-theme="light"] .cost-fabric-btn,
+body:not(.dark-mode) .cost-fabric-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.cost-fabric-btn:hover {
+  border-color: #10b981;
+}
+
+.cost-fabric-btn.active {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.15);
+  font-weight: 800;
+}
+
+/* Quantity Stepper */
+.cost-qty-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cost-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cost-stepper-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: inherit;
+  font-size: 1.2rem;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+[data-theme="light"] .cost-stepper-btn,
+body:not(.dark-mode) .cost-stepper-btn {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.cost-stepper-btn:hover {
+  background: #10b981;
+  color: #ffffff;
+  border-color: #10b981;
+}
+
+.cost-qty-display {
+  min-width: 46px;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.cost-bulk-discount-note {
+  font-size: 0.8rem;
+  color: #10b981;
+  font-weight: 700;
+}
+
+/* Add-ons Checklist */
+.cost-addons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cost-addon-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+[data-theme="light"] .cost-addon-label,
+body:not(.dark-mode) .cost-addon-label {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.cost-addon-label:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.cost-addon-label input[type="checkbox"] {
+  accent-color: #10b981;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Coupon Box */
+.cost-coupon-row {
+  display: flex;
+  gap: 8px;
+}
+
+.cost-coupon-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+[data-theme="light"] .cost-coupon-input,
+body:not(.dark-mode) .cost-coupon-input {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.cost-coupon-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: #10b981;
+  color: #ffffff;
+  border: none;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cost-coupon-btn:hover {
+  background: #059669;
+}
+
+/* COST SUMMARY RESULT CARD */
+.cost-result-card {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(6, 182, 212, 0.08) 100%);
+  border: 2px solid rgba(16, 185, 129, 0.35);
+  border-radius: 24px;
+  padding: 32px 28px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .cost-result-card,
+body:not(.dark-mode) .cost-result-card {
+  background: linear-gradient(145deg, #f0fdf4 0%, #ecfeff 100%);
+  border-color: #a7f3d0;
+}
+
+.cost-result-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #10b981;
+}
+
+[data-theme="light"] .cost-result-title,
+body:not(.dark-mode) .cost-result-title {
+  color: #065f46;
+}
+
+.cost-breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-size: 0.92rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+}
+
+[data-theme="light"] .cost-breakdown-list,
+body:not(.dark-mode) .cost-breakdown-list {
+  border-color: #cbd5e1;
+}
+
+.cost-breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cost-breakdown-row.discount-row {
+  color: #10b981;
+  font-weight: 800;
+}
+
+.cost-grand-total-box {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.cost-grand-total-label {
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+[data-theme="light"] .cost-grand-total-label,
+body:not(.dark-mode) .cost-grand-total-label {
+  color: #64748b;
+}
+
+.cost-grand-total-value {
+  font-size: 3.2rem;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 10px rgba(16, 185, 129, 0.3));
+  margin-bottom: 8px;
+}
+
+.cost-savings-pill {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  font-weight: 800;
+  font-size: 0.84rem;
+  padding: 4px 14px;
+  border-radius: 20px;
+}
+
+[data-theme="light"] .cost-savings-pill,
+body:not(.dark-mode) .cost-savings-pill {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.cost-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-add-cost-bundle {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transition: all 0.25s ease;
+  width: 100%;
+}
+
+.btn-add-cost-bundle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.55);
+}
+
+.btn-whatsapp-inquiry {
+  background: #25d366;
+  color: #ffffff;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: 100%;
+  text-decoration: none;
+}
+
+.btn-whatsapp-inquiry:hover {
+  background: #1eb857;
+  transform: translateY(-2px);
+}
+
+
 
 
 

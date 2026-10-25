@@ -90,10 +90,26 @@
           </div>
         </div>
 
-        <button class="action-btn" onclick="app.openSmartSizeModal()" title="الحاسبة الذكية للمقاسات" style="color: #8b5cf6;">
-          <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span class="action-label">الحاسبة الذكية</span>
-        </button>
+        <!-- Smart Calculators Dropdown Menu -->
+        <div class="user-menu-wrapper" style="position: relative;">
+          <button class="action-btn" id="calc-menu-btn" onclick="app.toggleCalcMenu()" title="الحاسبات الذكية" style="color: #8b5cf6;">
+            <i class="fa-solid fa-calculator"></i>
+            <span class="action-label">الحاسبات الذكية</span>
+          </button>
+          <div class="user-menu-dropdown" id="calc-dropdown" style="right: auto; left: 0; min-width: 220px;">
+            <div class="user-dropdown-header">
+              <span>أدوات وحاسبات النخبة</span>
+              <strong>اختر نوع الحاسبة</strong>
+            </div>
+            <button class="user-dropdown-item" onclick="app.scrollToSection('smart-calculator-section'); app.toggleCalcMenu(false)">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:#8b5cf6;"></i> حاسبة المقاسات الذكية 📏
+            </button>
+            <button class="user-dropdown-item" onclick="app.scrollToSection('cost-calculator-section'); app.toggleCalcMenu(false)">
+              <i class="fa-solid fa-coins" style="color:#10b981;"></i> حاسبة التكلفة والوفورات 💰
+            </button>
+          </div>
+        </div>
+
         <button class="action-btn" onclick="app.showTrackingModal()">
           <i class="fa-solid fa-truck-ramp-box"></i>
           <span class="action-label">تتبع الطلب</span>
@@ -124,8 +140,11 @@
           <p class="hero-desc">تشكيلة استثنائية من بدلات التوكسيدو المصممة من الصوف الإيطالي، الثياب الملكية المفصلة من قماش تويوبو الياباني الأصلي، والأزياء الشبابية الكاجوال العصرية مع ضمان الجودة 100%.</p>
           <div class="hero-actions">
             <a href="#products-section" class="btn btn-primary"><i class="fa-solid fa-shirt"></i> تصفح تشكيلة الملابس</a>
-            <button class="btn btn-outline" onclick="app.openSmartSizeModal()" style="border-color:#8b5cf6; color:inherit;">
-              <i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i> الحاسبة الذكية للمقاسات
+            <button class="btn btn-outline" onclick="app.scrollToSection('smart-calculator-section')" style="border-color:#8b5cf6; color:inherit;">
+              <i class="fa-solid fa-wand-magic-sparkles" style="color:#a855f7;"></i> حاسبة المقاس الذكية
+            </button>
+            <button class="btn btn-outline" onclick="app.scrollToSection('cost-calculator-section')" style="border-color:#10b981; color:inherit;">
+              <i class="fa-solid fa-coins" style="color:#10b981;"></i> حاسبة التكلفة والوفورات
             </button>
             <button class="btn btn-outline" onclick="app.openSizeGuideModal()"><i class="fa-solid fa-ruler-combined"></i> دليل المقاسات الشامل</button>
             <span class="hero-feature"><i class="fa-solid fa-truck-fast"></i> شحن سريع وضمان استرجاع 14 يوم</span>
@@ -142,101 +161,6 @@
         </div>
         <div class="categories-pills" id="categories-container">
           <!-- Dynamically populated -->
-        </div>
-      </div>
-    </section>
-
-    <!-- SMART AI SIZE CALCULATOR SHOWCASE SECTION -->
-    <section class="smart-calculator-section" id="smart-calculator-section">
-      <div class="smart-calc-container">
-        <div class="smart-calc-wrapper">
-          <div class="smart-calc-header">
-            <span class="smart-badge-pill">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> ذكاء اصطناعي تفاعلي حصري
-            </span>
-            <h2>الحاسبة الذكية لمقاسات الملابس والأزياء</h2>
-            <p>لا داعي للحيرة في اختيار مقاسك! حرّك مؤشرات الطول والوزن وحدد نوع القصة التي تفضلها، وسيقوم محرك القياس الذكي بتحديد مقاسك المثالي وعرض التشكيلات المناسبة لك فوراً.</p>
-          </div>
-
-          <div class="smart-calc-grid">
-            <!-- Left Side: Interactive Sliders & Fit Choice -->
-            <div class="smart-calc-inputs">
-              <!-- Height Slider Card -->
-              <div class="smart-slider-card">
-                <div class="slider-top-row">
-                  <label><i class="fa-solid fa-arrows-up-down" style="color:var(--primary);"></i> الطول التقريبي</label>
-                  <span class="slider-value-badge"><span id="home-smart-height-val">175</span> سم</span>
-                </div>
-                <input type="range" class="smart-range-input" id="home-smart-height" min="145" max="205" value="175" oninput="app.updateHomeSmartCalc()">
-                <div class="slider-ticks">
-                  <span>145 سم (قصير)</span>
-                  <span>175 سم (متوسط)</span>
-                  <span>205 سم (فارع)</span>
-                </div>
-              </div>
-
-              <!-- Weight Slider Card -->
-              <div class="smart-slider-card">
-                <div class="slider-top-row">
-                  <label><i class="fa-solid fa-weight-scale" style="color:#a855f7;"></i> الوزن التقريبي</label>
-                  <span class="slider-value-badge" style="background:#7c3aed;"><span id="home-smart-weight-val">74</span> كجم</span>
-                </div>
-                <input type="range" class="smart-range-input" id="home-smart-weight" min="45" max="135" value="74" oninput="app.updateHomeSmartCalc()">
-                <div class="slider-ticks">
-                  <span>45 كجم (نحيف)</span>
-                  <span>75 كجم (مثالي)</span>
-                  <span>135 كجم (ممتلئ)</span>
-                </div>
-              </div>
-
-              <!-- Fit Preference Toggle -->
-              <div class="fit-preference-group">
-                <label><i class="fa-solid fa-shirt"></i> أسلوب القصة المفضل لديك:</label>
-                <div class="fit-btn-row">
-                  <button type="button" class="fit-toggle-btn" data-fit="slim" onclick="app.setHomeFit('slim', this)">
-                    <i class="fa-solid fa-person"></i>
-                    <span>ممشوق ومجسم</span>
-                    <span class="fit-sub">Slim Fit</span>
-                  </button>
-                  <button type="button" class="fit-toggle-btn active" data-fit="regular" onclick="app.setHomeFit('regular', this)">
-                    <i class="fa-solid fa-person-walking"></i>
-                    <span>كلاسيكي مريح</span>
-                    <span class="fit-sub">Regular Fit</span>
-                  </button>
-                  <button type="button" class="fit-toggle-btn" data-fit="relaxed" onclick="app.setHomeFit('relaxed', this)">
-                    <i class="fa-solid fa-child-reaching"></i>
-                    <span>فضفاض وواسع</span>
-                    <span class="fit-sub">Oversized</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right Side: Realtime Size Result Card -->
-            <div class="smart-calc-result-card">
-              <span class="calc-result-tag"><i class="fa-solid fa-circle-check"></i> النتيجة المحسوبة بدقة فورية</span>
-              <div class="calc-big-size" id="home-smart-size-display">L</div>
-              <div class="calc-result-status" id="home-smart-fit-status">مقاس مثالي وقوام متناسق</div>
-              
-              <div class="calc-confidence-bar" title="دقة التوصية: 98%">
-                <div class="calc-confidence-fill" id="home-smart-confidence-fill"></div>
-              </div>
-              <span style="font-size:0.75rem; color:#10b981; font-weight:800;"><i class="fa-solid fa-sparkles"></i> نسبة تطابق المقاس: 98%</span>
-
-              <p class="calc-advice-note" id="home-smart-advice">
-                بناءً على طول 175 سم ووزن 74 كجم بقصة كلاسيكية، هذا المقاس يمنحك راحة قصوى على الصدر والكتفين.
-              </p>
-
-              <div class="smart-calc-actions">
-                <button type="button" class="btn-smart-filter" onclick="app.filterProductsBySmartCalc()">
-                  <i class="fa-solid fa-filter"></i> تصفح المنتجات المتوفرة بمقاس (<span id="home-smart-btn-size">L</span>)
-                </button>
-                <button type="button" class="btn-smart-modal-trigger" onclick="app.openSmartSizeModal()">
-                  <i class="fa-solid fa-sliders"></i> فتح الحاسبة المتقدمة لجميع التشكيلات
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -591,6 +515,300 @@
                 <i class="fa-solid fa-cart-arrow-down"></i> أضف الإطلالة بالكامل للسلة
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SMART TOOLS AT THE END OF STOREFRONT (حاسبات وأدوات النخبة)
+         ============================================================ -->
+
+    <!-- 1. SMART AI SIZE CALCULATOR (حاسبة المقاسات الذكية) -->
+    <section class="smart-calculator-section" id="smart-calculator-section">
+      <div class="smart-calc-container">
+        <div class="smart-calc-wrapper">
+          <div class="smart-calc-header">
+            <span class="smart-badge-pill">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> ذكاء اصطناعي تفاعلي حصري
+            </span>
+            <h2>الحاسبة الذكية لمقاسات الملابس والأزياء</h2>
+            <p>لا داعي للحيرة في اختيار مقاسك! حرّك مؤشرات الطول والوزن وحدد نوع القصة التي تفضلها، وسيقوم محرك القياس الذكي بتحديد مقاسك المثالي وعرض التشكيلات المناسبة لك فوراً.</p>
+          </div>
+
+          <div class="smart-calc-grid">
+            <!-- Left Side: Interactive Sliders & Fit Choice -->
+            <div class="smart-calc-inputs">
+              <!-- Height Slider Card -->
+              <div class="smart-slider-card">
+                <div class="slider-top-row">
+                  <label><i class="fa-solid fa-arrows-up-down" style="color:var(--primary);"></i> الطول التقريبي</label>
+                  <span class="slider-value-badge"><span id="home-smart-height-val">175</span> سم</span>
+                </div>
+                <input type="range" class="smart-range-input" id="home-smart-height" min="145" max="205" value="175" oninput="app.updateHomeSmartCalc()">
+                <div class="slider-ticks">
+                  <span>145 سم (قصير)</span>
+                  <span>175 سم (متوسط)</span>
+                  <span>205 سم (فارع)</span>
+                </div>
+              </div>
+
+              <!-- Weight Slider Card -->
+              <div class="smart-slider-card">
+                <div class="slider-top-row">
+                  <label><i class="fa-solid fa-weight-scale" style="color:#a855f7;"></i> الوزن التقريبي</label>
+                  <span class="slider-value-badge" style="background:#7c3aed;"><span id="home-smart-weight-val">74</span> كجم</span>
+                </div>
+                <input type="range" class="smart-range-input" id="home-smart-weight" min="45" max="135" value="74" oninput="app.updateHomeSmartCalc()">
+                <div class="slider-ticks">
+                  <span>45 كجم (نحيف)</span>
+                  <span>75 كجم (مثالي)</span>
+                  <span>135 كجم (ممتلئ)</span>
+                </div>
+              </div>
+
+              <!-- Fit Preference Toggle -->
+              <div class="fit-preference-group">
+                <label><i class="fa-solid fa-shirt"></i> أسلوب القصة المفضل لديك:</label>
+                <div class="fit-btn-row">
+                  <button type="button" class="fit-toggle-btn" data-fit="slim" onclick="app.setHomeFit('slim', this)">
+                    <i class="fa-solid fa-person"></i>
+                    <span>ممشوق ومجسم</span>
+                    <span class="fit-sub">Slim Fit</span>
+                  </button>
+                  <button type="button" class="fit-toggle-btn active" data-fit="regular" onclick="app.setHomeFit('regular', this)">
+                    <i class="fa-solid fa-person-walking"></i>
+                    <span>كلاسيكي مريح</span>
+                    <span class="fit-sub">Regular Fit</span>
+                  </button>
+                  <button type="button" class="fit-toggle-btn" data-fit="relaxed" onclick="app.setHomeFit('relaxed', this)">
+                    <i class="fa-solid fa-child-reaching"></i>
+                    <span>فضفاض وواسع</span>
+                    <span class="fit-sub">Oversized</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Side: Realtime Size Result Card -->
+            <div class="smart-calc-result-card">
+              <span class="calc-result-tag"><i class="fa-solid fa-circle-check"></i> النتيجة المحسوبة بدقة فورية</span>
+              <div class="calc-big-size" id="home-smart-size-display">L</div>
+              <div class="calc-result-status" id="home-smart-fit-status">مقاس مثالي وقوام متناسق</div>
+              
+              <div class="calc-confidence-bar" title="دقة التوصية: 98%">
+                <div class="calc-confidence-fill" id="home-smart-confidence-fill"></div>
+              </div>
+              <span style="font-size:0.75rem; color:#10b981; font-weight:800;"><i class="fa-solid fa-sparkles"></i> نسبة تطابق المقاس: 98%</span>
+
+              <p class="calc-advice-note" id="home-smart-advice">
+                بناءً على طول 175 سم ووزن 74 كجم بقصة كلاسيكية، هذا المقاس يمنحك راحة قصوى على الصدر والكتفين.
+              </p>
+
+              <div class="smart-calc-actions">
+                <button type="button" class="btn-smart-filter" onclick="app.filterProductsBySmartCalc()">
+                  <i class="fa-solid fa-filter"></i> تصفح المنتجات المتوفرة بمقاس (<span id="home-smart-btn-size">L</span>)
+                </button>
+                <button type="button" class="btn-smart-modal-trigger" onclick="app.openSmartSizeModal()">
+                  <i class="fa-solid fa-sliders"></i> فتح الحاسبة المتقدمة لجميع التشكيلات
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. STANDALONE COST & BUDGET CALCULATOR (حاسبة التكلفة والوفورات الذكية) -->
+    <section class="cost-calculator-section" id="cost-calculator-section">
+      <div class="cost-calc-container">
+        <div class="cost-calc-wrapper">
+          <div class="cost-calc-header">
+            <span class="cost-badge-pill">
+              <i class="fa-solid fa-coins"></i> تقدير مالي فوري وشفافية مطلقة
+            </span>
+            <h2>حاسبة التكلفة والميزانية الذكية (Cost & Order Estimator)</h2>
+            <p>اختر نوع القطعة، خامة القماش، والخدمات الخاصة التي تريدها لمعرفة التكلفة الإجمالية والخصومات الممنوحة فوراً، مع إمكانية إضافة الباقة المحسوبة لحقيبة التسوق بنقرة واحدة!</p>
+          </div>
+
+          <div class="cost-calc-grid">
+            <!-- Left Side: Configurable Options -->
+            <div class="cost-inputs-col">
+              
+              <!-- 1. Garment Selection -->
+              <div class="cost-card-box">
+                <label><i class="fa-solid fa-shirt" style="color:var(--primary);"></i> 1. نوع وتشكيلة القطعة:</label>
+                <div class="cost-garment-grid" id="cost-garment-group">
+                  <button type="button" class="cost-garment-btn active" data-type="suit" data-price="420" onclick="app.setCostGarment('suit', 420, 'بدلة توكسيدو إيطالية فاخرة', this)">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span class="garment-title">بدلة توكسيدو</span>
+                    <span class="garment-base-price">$420</span>
+                  </button>
+                  <button type="button" class="cost-garment-btn" data-type="thobe" data-price="160" onclick="app.setCostGarment('thobe', 160, 'ثوب عربي ملكي مفصل', this)">
+                    <i class="fa-solid fa-vest"></i>
+                    <span class="garment-title">ثوب ملكي مفصل</span>
+                    <span class="garment-base-price">$160</span>
+                  </button>
+                  <button type="button" class="cost-garment-btn" data-type="shirt" data-price="85" onclick="app.setCostGarment('shirt', 85, 'قميص أكسفورد ناصع البياض', this)">
+                    <i class="fa-solid fa-shirt"></i>
+                    <span class="garment-title">قميص أكسفورد</span>
+                    <span class="garment-base-price">$85</span>
+                  </button>
+                  <button type="button" class="cost-garment-btn" data-type="casual" data-price="75" onclick="app.setCostGarment('casual', 75, 'طقم هودي وكاجوال عصري', this)">
+                    <i class="fa-solid fa-person-walking"></i>
+                    <span class="garment-title">طقم كاجوال وهودي</span>
+                    <span class="garment-base-price">$75</span>
+                  </button>
+                  <button type="button" class="cost-garment-btn" data-type="shoes" data-price="220" onclick="app.setCostGarment('shoes', 220, 'حذاء أوكسفورد إيطالي كلاسيكي', this)">
+                    <i class="fa-solid fa-shoe-prints"></i>
+                    <span class="garment-title">حذاء أوكسفورد</span>
+                    <span class="garment-base-price">$220</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2. Fabric Quality Grade -->
+              <div class="cost-card-box">
+                <label><i class="fa-solid fa-feather" style="color:#0284c7;"></i> 2. خامة وجودة القماش الخام:</label>
+                <div class="cost-fabric-grid" id="cost-fabric-group">
+                  <button type="button" class="cost-fabric-btn active" data-fabric="wool" data-upgrade="60" onclick="app.setCostFabric('wool', 60, 'صوف إيطالي Super 150s', this)">
+                    <span>صوف إيطالي Super 150s</span>
+                    <strong style="color:#10b981;">+$60</strong>
+                  </button>
+                  <button type="button" class="cost-fabric-btn" data-fabric="toyobo" data-upgrade="40" onclick="app.setCostFabric('toyobo', 40, 'تويوبو ياباني ملكي أصلي', this)">
+                    <span>تويوبو ياباني ملكي</span>
+                    <strong style="color:#10b981;">+$40</strong>
+                  </button>
+                  <button type="button" class="cost-fabric-btn" data-fabric="cotton" data-upgrade="25" onclick="app.setCostFabric('cotton', 25, 'قطن مصري 100% Giza', this)">
+                    <span>قطن مصري 100% Giza</span>
+                    <strong style="color:#10b981;">+$25</strong>
+                  </button>
+                  <button type="button" class="cost-fabric-btn" data-fabric="classic" data-upgrade="0" onclick="app.setCostFabric('classic', 0, 'قماش المتجر الكلاسيكي المعتمد', this)">
+                    <span>قماش المتجر الكلاسيكي</span>
+                    <strong style="color:var(--text-light);">$0</strong>
+                  </button>
+                </div>
+              </div>
+
+              <!-- 3. Quantity Stepper -->
+              <div class="cost-card-box">
+                <div class="cost-qty-row">
+                  <div>
+                    <label style="margin:0;"><i class="fa-solid fa-layer-group" style="color:#f59e0b;"></i> 3. عدد القطع المطلوبة:</label>
+                    <span class="cost-bulk-discount-note" id="cost-bulk-note">خصم الكميات: اطلب 3+ قطع واحصل على خصم 10%!</span>
+                  </div>
+                  <div class="cost-stepper">
+                    <button type="button" class="cost-stepper-btn" onclick="app.changeCostQty(-1)">-</button>
+                    <span class="cost-qty-display" id="cost-qty-display">1</span>
+                    <button type="button" class="cost-stepper-btn" onclick="app.changeCostQty(1)">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Custom Add-ons -->
+              <div class="cost-card-box">
+                <label><i class="fa-solid fa-wand-magic-sparkles" style="color:#8b5cf6;"></i> 4. خدمات وتخصيصات اختيارية:</label>
+                <div class="cost-addons-list">
+                  <label class="cost-addon-label">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                      <input type="checkbox" id="cost-addon-monogram" data-price="20" onchange="app.calculateCostTotal()">
+                      <span>تطريز مونوغرام شخصي للاسم بالأحرف الذهبية</span>
+                    </span>
+                    <strong>+$20</strong>
+                  </label>
+                  <label class="cost-addon-label">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                      <input type="checkbox" id="cost-addon-tailoring" data-price="30" onchange="app.calculateCostTotal()">
+                      <span>تعديل وتفصيل المقاسات الدقيق بالمستودع (Custom Tailoring)</span>
+                    </span>
+                    <strong>+$30</strong>
+                  </label>
+                  <label class="cost-addon-label">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                      <input type="checkbox" id="cost-addon-box" data-price="15" onchange="app.calculateCostTotal()">
+                      <span>صندوق إهداء وتغليف فاخر VIP Gift Box</span>
+                    </span>
+                    <strong>+$15</strong>
+                  </label>
+                  <label class="cost-addon-label">
+                    <span style="display:flex; align-items:center; gap:8px;">
+                      <input type="checkbox" id="cost-addon-express" data-price="20" onchange="app.calculateCostTotal()">
+                      <span>توصيل وشحن VIP سريع مؤمن مع أولوية التجهيز</span>
+                    </span>
+                    <strong>+$20</strong>
+                  </label>
+                </div>
+              </div>
+
+              <!-- 5. Promotional Coupon -->
+              <div class="cost-card-box">
+                <label><i class="fa-solid fa-tag" style="color:#ec4899;"></i> 5. كود خصم إضافي (كوبون):</label>
+                <div class="cost-coupon-row">
+                  <input type="text" class="cost-coupon-input" id="cost-coupon-input" placeholder="مثال: SUMMER20 أو VIP10">
+                  <button type="button" class="cost-coupon-btn" onclick="app.applyCostCoupon()">تطبيق الكوبون</button>
+                </div>
+                <div id="cost-coupon-status" style="font-size:0.8rem; margin-top:6px; font-weight:700;"></div>
+              </div>
+
+            </div>
+
+            <!-- Right Side: Live Dynamic Cost Results Card -->
+            <div class="cost-result-card">
+              <div class="cost-result-title">
+                <i class="fa-solid fa-file-invoice-dollar"></i> تفاصيل التكلفة المحسوبة
+              </div>
+
+              <div class="cost-breakdown-list">
+                <div class="cost-breakdown-row">
+                  <span>سعر القطعة الأساسي (<span id="cost-summary-garment">بدلة توكسيدو</span>):</span>
+                  <strong id="cost-summary-base">$420.00</strong>
+                </div>
+                <div class="cost-breakdown-row">
+                  <span>ترقية القماش (<span id="cost-summary-fabric">صوف إيطالي</span>):</span>
+                  <strong id="cost-summary-fabric-val">+$60.00</strong>
+                </div>
+                <div class="cost-breakdown-row">
+                  <span>العدد الإجمالي:</span>
+                  <strong id="cost-summary-qty">1 قطعة</strong>
+                </div>
+                <div class="cost-breakdown-row">
+                  <span>الخدمات والتعديلات الخاصة:</span>
+                  <strong id="cost-summary-addons">$0.00</strong>
+                </div>
+                <div class="cost-breakdown-row discount-row" id="cost-summary-discount-row" style="display:none;">
+                  <span>الخصومات والتوفير الممنوح:</span>
+                  <strong id="cost-summary-discount">-$0.00</strong>
+                </div>
+                <div class="cost-breakdown-row">
+                  <span>ضريبة القيمة المضافة (15% مشمولة):</span>
+                  <strong id="cost-summary-vat">$62.61</strong>
+                </div>
+                <div class="cost-breakdown-row">
+                  <span>رسوم الشحن والتوصيل:</span>
+                  <strong id="cost-summary-shipping" style="color:#10b981;">مجاني</strong>
+                </div>
+              </div>
+
+              <!-- Grand Total Glowing Box -->
+              <div class="cost-grand-total-box">
+                <div class="cost-grand-total-label">التكلفة التقديرية الصافية المستحقة</div>
+                <div class="cost-grand-total-value" id="cost-grand-total">$480.00</div>
+                <div class="cost-savings-pill" id="cost-savings-pill" style="display:none;">
+                  وفرت $0.00 في هذه الباقة! 🎉
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="cost-actions-group">
+                <button type="button" class="btn-add-cost-bundle" onclick="app.addCostCalculatedBundleToCart()">
+                  <i class="fa-solid fa-bag-shopping"></i> إضافة هذه التشكيلة لحقيبة التسوق
+                </button>
+                <a href="javascript:void(0)" class="btn-whatsapp-inquiry" id="cost-whatsapp-link" onclick="app.sendCostInquiryWhatsapp()">
+                  <i class="fa-brands fa-whatsapp"></i> طلب تفصيل مباشر عبر واتساب
+                </a>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -2723,11 +2941,17 @@
     </div>
   </div>
 
-  <!-- Floating Smart Calculator Button (FAB) -->
-  <a href="javascript:void(0)" class="smart-calc-fab" onclick="app.openSmartSizeModal()" title="حاسبة المقاسات الذكية الفورية">
-    <i class="fa-solid fa-wand-magic-sparkles"></i>
-    <span>الحاسبة الذكية 📏</span>
-  </a>
+  <!-- Floating Smart Calculators Launcher (FAB) -->
+  <div style="position: fixed; bottom: 85px; left: 24px; z-index: 990; display: flex; flex-direction: column; gap: 8px;">
+    <a href="javascript:void(0)" class="smart-calc-fab" onclick="app.scrollToSection('cost-calculator-section')" title="حاسبة التكلفة والوفورات الذكية" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); position: static;">
+      <i class="fa-solid fa-coins"></i>
+      <span>حاسبة التكلفة 💰</span>
+    </a>
+    <a href="javascript:void(0)" class="smart-calc-fab" onclick="app.scrollToSection('smart-calculator-section')" title="حاسبة المقاسات الذكية الفورية" style="position: static;">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      <span>حاسبة المقاس 📏</span>
+    </a>
+  </div>
 
   <!-- Toast Notification System Container -->
   <div class="toast-container" id="toast-container"></div>

@@ -63,6 +63,7 @@ const app = {
 
     this.renderStore();
     this.updateHomeSmartCalc();
+    this.calculateCostTotal();
     this.setupEventListeners();
   },
 
@@ -3723,6 +3724,232 @@ const app = {
       targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     this.showToast(`✨ تم تصفية الملابس المتوفرة بمقاسك الذكي الموصى به (${size})!`, 'success');
+  },
+
+  // STANDALONE SMART COST & BUDGET ESTIMATOR (حاسبة التكلفة والوفورات الذكية)
+  costGarment: { type: 'suit', price: 420, title: 'بدلة توكسيدو إيطالية فاخرة' },
+  costFabric: { type: 'wool', upgrade: 60, title: 'صوف إيطالي Super 150s' },
+  costQty: 1,
+  costCouponDiscount: 0,
+  costCouponCode: '',
+
+  setCostGarment: function(type, price, title, btn) {
+    this.costGarment = { type, price, title };
+    document.querySelectorAll('.cost-garment-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    this.calculateCostTotal();
+  },
+
+  setCostFabric: function(type, upgrade, title, btn) {
+    this.costFabric = { type, upgrade, title };
+    document.querySelectorAll('.cost-fabric-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    this.calculateCostTotal();
+  },
+
+  changeCostQty: function(delta) {
+    this.costQty = Math.max(1, Math.min(20, (this.costQty || 1) + delta));
+    const disp = document.getElementById('cost-qty-display');
+    if (disp) disp.innerText = this.costQty;
+    this.calculateCostTotal();
+  },
+
+  applyCostCoupon: async function() {
+    const input = document.getElementById('cost-coupon-input');
+    const status = document.getElementById('cost-coupon-status');
+    const code = (input?.value || '').trim().toUpperCase();
+
+    if (!code) {
+      this.costCouponDiscount = 0;
+      this.costCouponCode = '';
+      if (status) status.innerText = '';
+      this.calculateCostTotal();
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, subtotal: 500 })
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        this.costCouponDiscount = data.data.discount_percent || 15;
+        this.costCouponCode = code;
+        if (status) {
+          status.style.color = '#10b981';
+          status.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم تطبيق كود الخصم (${code}) بنجاح! خصم إضافي ${this.costCouponDiscount}%`;
+        }
+        this.showToast(`تم تطبيق كود الخصم (${code}) بخصم ${this.costCouponDiscount}% 🎉`, 'success');
+      } else {
+        // Fallback for demo codes
+        if (code === 'SUMMER20' || code === 'VIP10' || code === 'ELITE15') {
+          this.costCouponDiscount = code === 'SUMMER20' ? 20 : (code === 'ELITE15' ? 15 : 10);
+          this.costCouponCode = code;
+          if (status) {
+            status.style.color = '#10b981';
+            status.innerHTML = `<i class="fa-solid fa-circle-check"></i> تم تطبيق الكوبون (${code}) بنجاح! خصم ${this.costCouponDiscount}%`;
+          }
+        } else {
+          this.costCouponDiscount = 0;
+          this.costCouponCode = '';
+          if (status) {
+            status.style.color = '#ef4444';
+            status.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> كود الخصم غير صحيح أو منتهي الصلاحية';
+          }
+        }
+      }
+    } catch (e) {
+      if (code === 'SUMMER20') {
+        this.costCouponDiscount = 20;
+        this.costCouponCode = code;
+      }
+    }
+
+    this.calculateCostTotal();
+  },
+
+  calculateCostTotal: function() {
+    const garment = this.costGarment || { type: 'suit', price: 420, title: 'بدلة توكسيدو إيطالية فاخرة' };
+    const fabric = this.costFabric || { type: 'wool', upgrade: 60, title: 'صوف إيطالي Super 150s' };
+    const qty = this.costQty || 1;
+
+    // Unit base + fabric upgrade
+    const unitPrice = garment.price + fabric.upgrade;
+    const baseSubtotal = unitPrice * qty;
+
+    // Addons
+    let addonsTotal = 0;
+    if (document.getElementById('cost-addon-monogram')?.checked) addonsTotal += 20 * qty;
+    if (document.getElementById('cost-addon-tailoring')?.checked) addonsTotal += 30 * qty;
+    if (document.getElementById('cost-addon-box')?.checked) addonsTotal += 15 * qty;
+    if (document.getElementById('cost-addon-express')?.checked) addonsTotal += 20;
+
+    // Bulk discount tiers
+    let bulkPercent = 0;
+    let bulkNote = 'خصم الكميات: اطلب 3+ قطع واحصل على خصم 10%!';
+    if (qty >= 10) {
+      bulkPercent = 25;
+      bulkNote = 'مبروك! حصلت على خصم الشركات والمناسبات الخاص 25%! 🔥';
+    } else if (qty >= 5) {
+      bulkPercent = 15;
+      bulkNote = 'مبروك! حصلت على خصم الباقة المميزة 15%! 🎁';
+    } else if (qty >= 3) {
+      bulkPercent = 10;
+      bulkNote = 'مبروك! حصلت على خصم الكميات المعتمد 10%! 🌟';
+    }
+
+    const bulkNoteEl = document.getElementById('cost-bulk-note');
+    if (bulkNoteEl) bulkNoteEl.innerText = bulkNote;
+
+    // Combined discount %
+    const totalDiscountPercent = bulkPercent + (this.costCouponDiscount || 0);
+    const grossTotalBeforeDiscount = baseSubtotal + addonsTotal;
+    const discountAmount = Math.round((grossTotalBeforeDiscount * totalDiscountPercent) / 100);
+
+    const netSubtotal = Math.max(0, grossTotalBeforeDiscount - discountAmount);
+    const shipping = (netSubtotal >= 150 || netSubtotal === 0) ? 0 : 15;
+    const grandTotal = netSubtotal + (shipping > 0 ? shipping : 0);
+
+    // VAT 15% portion included
+    const vatIncluded = Math.round((grandTotal - (grandTotal / 1.15)) * 100) / 100;
+
+    // Update UI Elements
+    const sumGarment = document.getElementById('cost-summary-garment');
+    const sumBase = document.getElementById('cost-summary-base');
+    const sumFabric = document.getElementById('cost-summary-fabric');
+    const sumFabricVal = document.getElementById('cost-summary-fabric-val');
+    const sumQty = document.getElementById('cost-summary-qty');
+    const sumAddons = document.getElementById('cost-summary-addons');
+    const sumDiscountRow = document.getElementById('cost-summary-discount-row');
+    const sumDiscount = document.getElementById('cost-summary-discount');
+    const sumVat = document.getElementById('cost-summary-vat');
+    const sumShipping = document.getElementById('cost-summary-shipping');
+    const grandTotalEl = document.getElementById('cost-grand-total');
+    const savingsPill = document.getElementById('cost-savings-pill');
+
+    if (sumGarment) sumGarment.innerText = garment.title.split(' ')[0] + ' ' + (garment.title.split(' ')[1] || '');
+    if (sumBase) sumBase.innerText = `$${(garment.price * qty).toFixed(2)}`;
+    if (sumFabric) sumFabric.innerText = fabric.title.split(' ')[0] + ' ' + (fabric.title.split(' ')[1] || '');
+    if (sumFabricVal) sumFabricVal.innerText = fabric.upgrade > 0 ? `+$${(fabric.upgrade * qty).toFixed(2)}` : '$0.00';
+    if (sumQty) sumQty.innerText = `${qty} قطعة`;
+    if (sumAddons) sumAddons.innerText = addonsTotal > 0 ? `+$${addonsTotal.toFixed(2)}` : '$0.00';
+
+    if (discountAmount > 0) {
+      if (sumDiscountRow) sumDiscountRow.style.display = 'flex';
+      if (sumDiscount) sumDiscount.innerText = `-$${discountAmount.toFixed(2)} (${totalDiscountPercent}%)`;
+      if (savingsPill) {
+        savingsPill.style.display = 'inline-block';
+        savingsPill.innerText = `وفرت $${discountAmount.toFixed(2)} مع هذه الباقة! 🎉`;
+      }
+    } else {
+      if (sumDiscountRow) sumDiscountRow.style.display = 'none';
+      if (savingsPill) savingsPill.style.display = 'none';
+    }
+
+    if (sumVat) sumVat.innerText = `$${vatIncluded.toFixed(2)}`;
+    if (sumShipping) sumShipping.innerText = shipping === 0 ? 'مجاني' : `$${shipping.toFixed(2)}`;
+    if (grandTotalEl) grandTotalEl.innerText = `$${grandTotal.toFixed(2)}`;
+
+    this.calculatedCostBundle = {
+      title: `${garment.title} (${fabric.title})`,
+      garment: garment.title,
+      fabric: fabric.title,
+      quantity: qty,
+      addonsTotal,
+      unitPrice: Math.round((grandTotal / qty) * 100) / 100,
+      grandTotal,
+      discountAmount
+    };
+  },
+
+  addCostCalculatedBundleToCart: function() {
+    this.calculateCostTotal();
+    const bundle = this.calculatedCostBundle;
+    if (!bundle) return;
+
+    const cartKey = `custom-bundle-${Date.now()}`;
+    this.cart.push({
+      id: 9999,
+      cartKey,
+      name_ar: `باقة تفصيل مخصصة: ${bundle.title}`,
+      price: bundle.unitPrice,
+      image_url: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?auto=format&fit=crop&w=400&q=80',
+      size: 'تفصيل مخصص حسب الطلب',
+      color: 'اختيار العميل',
+      quantity: bundle.quantity
+    });
+
+    this.saveCart();
+    this.updateCartUI();
+    this.showToast(`تمت إضافة باقة (${bundle.title}) إلى حقيبة التسوق بنجاح! 🛍️`, 'success');
+    this.openCartDrawer();
+  },
+
+  sendCostInquiryWhatsapp: function() {
+    this.calculateCostTotal();
+    const b = this.calculatedCostBundle;
+    const msg = `مرحباً متجر النخبة للأزياء، أرغب في الاستفسار وطلب تفصيل هذه التشكيلة المحسوبة عبر الحاسبة الذكية:\n\n- الموديل: ${b.garment}\n- القماش: ${b.fabric}\n- عدد القطع: ${b.quantity} قطعة\n- التكلفة التقديرية الإجمالية: $${b.grandTotal.toFixed(2)}\n\nيرجى التواصل معي لاعتماد المقاسات والتنفيذ. شكراً لكم!`;
+    const encoded = encodeURIComponent(msg);
+    window.open(`https://wa.me/966500000000?text=${encoded}`, '_blank');
+  },
+
+  scrollToSection: function(id) {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  },
+
+  toggleCalcMenu: function(force) {
+    const dropdown = document.getElementById('calc-dropdown');
+    if (!dropdown) return;
+    if (typeof force === 'boolean') {
+      dropdown.classList.toggle('active', force);
+    } else {
+      dropdown.classList.toggle('active');
+    }
   },
 
   // SHOP THE LOOK / OUTFIT BUNDLE COORDINATOR
