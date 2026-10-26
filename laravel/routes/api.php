@@ -67,7 +67,8 @@ Route::get('/admin/users/{id}/orders', [UserController::class, 'userOrders']);
 Route::patch('/admin/users/{id}/role', [UserController::class, 'updateRole']);
 Route::delete('/admin/users/{id}', [UserController::class, 'destroy']);
 
-// --- Admin Reviews Management ---
+// --- Reviews Management & Helpful Votes ---
+Route::post('/reviews/{id}/helpful', [ReviewController::class, 'helpfulVote']);
 Route::get('/admin/reviews', [ReviewController::class, 'index']);
 Route::delete('/admin/reviews/{id}', [ReviewController::class, 'destroy']);
 

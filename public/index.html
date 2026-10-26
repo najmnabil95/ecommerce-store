@@ -890,6 +890,10 @@
             <i class="fa-solid fa-database"></i>
             <span>محرك MariaDB والنظام</span>
           </button>
+          <button class="admin-nav-item" onclick="app.switchAdminTab('audit-tab', this)">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>سجل العمليات والتدقيق (Audit)</span>
+          </button>
         </div>
 
         <!-- Sidebar User Footer -->
@@ -943,6 +947,30 @@
             <div class="admin-live-clock" id="admin-live-clock">
               <i class="fa-regular fa-clock"></i> <span id="admin-clock-text">--:--</span>
             </div>
+            
+            <!-- Live Alerts Hub -->
+            <div class="admin-notifs-wrapper">
+              <button class="admin-top-action-btn admin-bell-btn" onclick="app.toggleAdminAlertsMenu()" title="مركز التنبيهات الفورية والمخزون">
+                <i class="fa-solid fa-bell"></i>
+                <span class="admin-bell-badge" id="admin-alerts-badge">3</span>
+              </button>
+              <div class="admin-alerts-dropdown" id="admin-alerts-dropdown">
+                <div class="alerts-dropdown-header">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <i class="fa-solid fa-bell" style="color:var(--primary);"></i>
+                    <strong>مركز التنبيهات الفورية</strong>
+                  </div>
+                  <button type="button" class="btn-text-sm" onclick="app.markAllAlertsRead()">تحديد الكل كمقروء</button>
+                </div>
+                <div class="alerts-dropdown-body" id="admin-alerts-list">
+                  <!-- Rendered dynamically -->
+                </div>
+                <div class="alerts-dropdown-footer">
+                  <button type="button" class="btn-text-sm" onclick="app.switchAdminTab('audit-tab'); app.toggleAdminAlertsMenu(false);">عرض سجل العمليات والتدقيق الكامل ←</button>
+                </div>
+              </div>
+            </div>
+
             <button class="admin-top-action-btn" onclick="app.refreshAdminDashboard()" title="تحديث حي للبيانات">
               <i class="fa-solid fa-arrows-rotate" id="admin-refresh-icon"></i>
             </button>
@@ -1427,7 +1455,8 @@
                 <th>المنتج</th>
                 <th>صاحب التقييم</th>
                 <th>التقييم</th>
-                <th>نص المراجعة</th>
+                <th>نص المراجعة والوسوم</th>
+                <th style="text-align:center;">التجربة وتصويت الفائدة</th>
                 <th>التاريخ</th>
                 <th>الإجراءات</th>
               </tr>
@@ -1612,6 +1641,47 @@
         </div>
 
       </div><!-- /#database-tab -->
+
+      <!-- TAB 10: SYSTEM AUDIT TRAIL LOG -->
+      <div id="audit-tab" class="tab-content" style="display: none;">
+        <div class="tab-actions">
+          <div>
+            <h3 style="margin:0 0 4px 0;"><i class="fa-solid fa-clipboard-list" style="color:var(--primary);"></i> سجل تدقيق العمليات والنشاطات (System Audit Trail)</h3>
+            <p style="margin:0; font-size:0.85rem; color:var(--text-light);">سجل موثق ودقيق لجميع الحركات الإدارية (تعديل الأسعار، تغيير المخزون، معالجة الطلبات، والكوبونات)</p>
+          </div>
+          <div style="display:flex; gap:8px; align-items:center;">
+            <select id="audit-filter-category" class="form-control" style="width:170px; padding:6px 10px; font-size:0.85rem;" onchange="app.filterAuditLog()">
+              <option value="all">جميع العمليات</option>
+              <option value="المخزون">المخزون والمستودع</option>
+              <option value="الطلبات">المبيعات والطلبات</option>
+              <option value="الأسعار">الأسعار والخصومات</option>
+              <option value="الأمان">الأمان والمستخدمين</option>
+              <option value="النظام">النظام وقاعدة البيانات</option>
+            </select>
+            <button class="btn btn-secondary btn-sm" onclick="app.exportAuditLogCSV()"><i class="fa-solid fa-file-csv"></i> تصدير CSV</button>
+            <button class="btn btn-danger btn-sm" onclick="app.clearAuditLog()"><i class="fa-solid fa-trash-can"></i> مسح السجل</button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden; margin-top:20px; border-radius:14px; border:1px solid var(--border-color);">
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width:170px;">التاريخ والوقت</th>
+                  <th style="width:140px;">نوع الحركة</th>
+                  <th style="width:160px;">المسؤول</th>
+                  <th>البيان والتفاصيل الإجرائية</th>
+                  <th style="width:130px; text-align:center;">الحالة</th>
+                </tr>
+              </thead>
+              <tbody id="admin-audit-tbody">
+                <!-- Rendered dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><!-- /#audit-tab -->
 
         </div><!-- /.admin-content-body -->
       </div><!-- /.admin-main-wrapper -->
@@ -2951,6 +3021,62 @@
       <i class="fa-solid fa-wand-magic-sparkles"></i>
       <span>حاسبة المقاس 📏</span>
     </a>
+  </div>
+
+  <!-- Floating Compare Bar (يظهر تلقائياً عند تحديد قطع للمقارنة) -->
+  <div id="compare-floating-bar" class="compare-floating-bar">
+    <div class="compare-bar-content">
+      <div class="compare-bar-info">
+        <div class="compare-bar-badge"><i class="fa-solid fa-code-compare"></i> مقارنة القطع</div>
+        <span id="compare-bar-count">0 من 4 قطع محددة</span>
+      </div>
+      <div class="compare-bar-thumbs" id="compare-bar-thumbs">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="compare-bar-actions">
+        <button class="btn btn-primary btn-sm" onclick="app.openCompareModal()">
+          <i class="fa-solid fa-scale-balanced"></i> قارن الآن
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="app.clearCompare()" title="تفريغ قائمة المقارنة">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Smart Product Comparison Modal -->
+  <div id="compare-modal" class="modal">
+    <div class="modal-dialog modal-xl" style="max-width: 1100px;">
+      <div class="modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg, #2563eb, #7c3aed); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.2rem;">
+            <i class="fa-solid fa-code-compare"></i>
+          </div>
+          <div>
+            <h3 style="margin:0;">مقارنة المنتجات الذكية جنباً إلى جنب</h3>
+            <span style="font-size:0.85rem; color:var(--text-light);">مقارنة تفصيلية لمواصفات القماش، المقاسات، الألوان، وحالة المخزون</span>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="app.closeModal('compare-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="compare-modal-body" style="padding: 24px; overflow-x: auto;">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Review Photo Lightbox Modal -->
+  <div id="review-photo-modal" class="modal">
+    <div class="modal-dialog modal-md" style="max-width: 520px; text-align:center;">
+      <div class="modal-header">
+        <h3 id="review-photo-title" style="margin:0; font-size:1.1rem;"><i class="fa-solid fa-camera" style="color:var(--primary);"></i> صورة المنتج من تجربة العميل الموثقة</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('review-photo-modal')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" style="padding: 20px;">
+        <img id="review-photo-img" src="" alt="صورة المراجعة" style="width:100%; max-height:460px; object-fit:contain; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,0.25);">
+        <p id="review-photo-caption" style="margin-top:14px; font-weight:700; color:var(--text); line-height:1.5;"></p>
+      </div>
+    </div>
   </div>
 
   <!-- Toast Notification System Container -->

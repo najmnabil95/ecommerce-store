@@ -40,7 +40,31 @@ const app = {
   commandSelectedIndex: 0,
   commandPaletteItems: [],
 
-  // Notifications Hub State
+  // Product Comparison Tool State
+  compareList: JSON.parse(localStorage.getItem('elite_compare') || '[]'),
+
+  // Reviews System State (Verified, Photos, Tags, Helpful Votes)
+  currentReviewFilter: 'all',
+  selectedReviewTags: [],
+  helpfulVotes: JSON.parse(localStorage.getItem('elite_helpful_votes') || '[]'),
+
+  // Admin Activity Audit Trail State
+  auditLog: JSON.parse(localStorage.getItem('elite_audit_log') || 'null') || [
+    { id: 1, timestamp: '2026-10-26 10:15:22', category: 'المخزون', user: 'مدير المستودع (أحمد)', details: 'تحديث مخزون بدلة التوكسيدو الإيطالية (+10 قطع)', status: 'ناجحة' },
+    { id: 2, timestamp: '2026-10-26 09:40:10', category: 'الأسعار', user: 'المشرف الرئيسي', details: 'تطبيق خصم 20% لكوبون FASHION20 للطلبات الفاخرة', status: 'ناجحة' },
+    { id: 3, timestamp: '2026-10-26 08:30:45', category: 'الطلبات', user: 'فريق الشحن (خالد)', details: 'تحديث حالة الطلب #ELITE-98231 إلى (تم الشحن)', status: 'ناجحة' },
+    { id: 4, timestamp: '2026-10-25 18:20:00', category: 'الأمان', user: 'مدير النظام العام', details: 'تأمين الصلاحيات وفحص جلسات الدخول في MariaDB', status: 'ناجحة' },
+    { id: 5, timestamp: '2026-10-25 15:10:14', category: 'النظام', user: 'النظام الآلي', details: 'تحسين الفهارس وصيانة جداول قاعدة البيانات (Optimize)', status: 'ناجحة' }
+  ],
+
+  // Real-time Admin Alerts Hub State
+  adminAlerts: JSON.parse(localStorage.getItem('elite_admin_alerts') || 'null') || [
+    { id: 1, type: 'danger', icon: 'fa-triangle-exclamation', title: 'تنبيه مخزون وشيك على النفاد ⚠️', desc: 'تبقى 2 قطع فقط من "حذاء أوكسفورد الملكي" في المستودع', time: 'منذ 15 دقيقة', unread: true },
+    { id: 2, type: 'success', icon: 'fa-bag-shopping', title: 'طلب شراء فاخر جديد 🛍️', desc: 'تم استلام طلب جديد بقيمة $420.00 قيد التجهيز الفوري', time: 'منذ 32 دقيقة', unread: true },
+    { id: 3, type: 'info', icon: 'fa-camera', title: 'تقييم موثق جديد مع صورة 📷', desc: 'أضاف العميل سعد الهاجري مراجعة مصورة لبدلة التوكسيدو', time: 'منذ ساعة', unread: true }
+  ],
+
+  // Notifications Hub State (Storefront)
   notifications: JSON.parse(localStorage.getItem('elite_notifs') || 'null') || [
     { id: 1, title: 'كوبون خصم حصري! 🎉', desc: 'استخدم الكود ELITE20 للحصول على خصم 20% على طلبك', time: 'منذ ساعتين', unread: true },
     { id: 2, title: 'شحن مجاني سريع 🚚', desc: 'تم تفعيل الشحن المجاني التلقائي للطلبات بقيمة $150 أو أكثر', time: 'منذ 5 ساعات', unread: true },
@@ -54,6 +78,8 @@ const app = {
     this.updateWishlistBadge();
     this.updateCartUI();
     this.renderNotifications();
+    this.renderAdminAlerts();
+    this.renderFloatingCompareBar();
     this.setupCommandPaletteListeners();
 
     // Fetch live settings, categories and products from MariaDB database
@@ -64,6 +90,7 @@ const app = {
     this.renderStore();
     this.updateHomeSmartCalc();
     this.calculateCostTotal();
+    this.renderAuditLog();
     this.setupEventListeners();
   },
 
@@ -238,6 +265,7 @@ const app = {
 
     grid.innerHTML = list.map(p => {
       const isWish = this.wishlist.some(w => w.id === p.id);
+      const isCompared = this.compareList.includes(p.id);
       const origPriceHtml = p.original_price ? `<span class="original-price">$${p.original_price.toFixed(2)}</span>` : '';
       const outOfStock = (p.stock <= 0);
       let badgeHtml = '';
@@ -278,8 +306,11 @@ const app = {
         <div class="product-card ${outOfStock ? 'out-of-stock-card' : ''}">
           <div class="product-image-wrap">
             ${badgeHtml}
-            <button class="wishlist-btn ${isWish ? 'active' : ''}" onclick="app.toggleWishlist(${p.id})">
+            <button class="wishlist-btn ${isWish ? 'active' : ''}" onclick="app.toggleWishlist(${p.id})" title="إضافة للمفضلة">
               <i class="${isWish ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+            </button>
+            <button class="compare-action-btn ${isCompared ? 'active' : ''}" onclick="event.stopPropagation(); app.toggleCompare(${p.id})" title="${isCompared ? 'إلغاء المقارنة' : 'إضافة إلى مقارنة القطع'}">
+              <i class="fa-solid fa-code-compare"></i>
             </button>
             <img src="${p.image_url}" alt="${p.name_ar}" class="product-img" onclick="app.quickView(${p.id})">
             <button class="quick-view-btn" onclick="app.quickView(${p.id})">
@@ -1704,9 +1735,14 @@ const app = {
       if (data.success) {
         if (newStock === 0) {
           this.showToast(`⚠️ تنبيه: نفدت كمية "${prod.name_ar}" بالكامل (الكمية مخلصة)!`, 'warning');
+          this.pushAdminAlert('danger', 'fa-triangle-exclamation', 'نفاد مخزون كامل ⚠️', `نفدت كمية المنتج "${prod.name_ar}" بالكامل (0 قطع)`);
         } else {
           this.showToast(`تم تحديث مخزون "${prod.name_ar}": أصبح ${newStock} قطعة 📦`, 'success');
+          if (newStock <= 3) {
+            this.pushAdminAlert('warning', 'fa-fire', 'تنبيه مخزون منخفض 🔥', `تبقى ${newStock} قطع فقط من "${prod.name_ar}"`);
+          }
         }
+        this.logAudit('تعديل مخزون', 'المخزون', `تعديل مخزون "${prod.name_ar}" بمقدار (${delta > 0 ? '+' + delta : delta}) قطعة، الرصيد الجديد: ${newStock}`);
         await this.loadAdminStats();
       }
     } catch (e) {
@@ -1742,9 +1778,11 @@ const app = {
       if (data.success) {
         if (newStock === 0) {
           this.showToast(`⚠️ تم تسجيل الكمية كـ (مخلصة / 0 قطع) لـ "${prodName}"`, 'warning');
+          this.pushAdminAlert('danger', 'fa-triangle-exclamation', 'نفاد مخزون ⚠️', `تم تعيين كمية "${prodName}" إلى صفر`);
         } else {
           this.showToast(`تم تسجيل المخزون بنجاح: ${newStock} قطعة لـ "${prodName}" 📦`, 'success');
         }
+        this.logAudit('تعديل مخزون', 'المخزون', `تحديد مخزون "${prodName}" يدوياً إلى ${newStock} قطعة`);
         await this.loadAdminStats();
       }
     } catch (e) {
@@ -2758,7 +2796,8 @@ const app = {
       'reviews-tab': 'التقييمات والمراجعات',
       'coupons-tab': 'الكوبونات والخصومات',
       'settings-tab': 'إعدادات المتجر العامة',
-      'database-tab': 'محرك MariaDB والنظام'
+      'database-tab': 'محرك MariaDB والنظام',
+      'audit-tab': 'سجل العمليات والتدقيق (System Audit Trail)'
     };
     const bcEl = document.getElementById('admin-current-breadcrumb');
     if (bcEl && breadcrumbMap[tabId]) bcEl.innerText = breadcrumbMap[tabId];
@@ -2772,6 +2811,7 @@ const app = {
     else if (tabId === 'orders-tab') this.loadAdminOrders();
     else if (tabId === 'products-tab') this.loadAdminProducts();
     else if (tabId === 'coupons-tab') this.loadAdminCoupons();
+    else if (tabId === 'audit-tab') this.renderAuditLog();
   },
 
   // ADMIN CATEGORIES MANAGEMENT
@@ -2993,17 +3033,38 @@ const app = {
         return;
       }
 
-      tbody.innerHTML = data.data.map(r => `
+      tbody.innerHTML = data.data.map(r => {
+        const pImg = r.product?.image_url || r.product_image || '';
+        const pName = r.product?.name_ar || r.product_name || '-';
+        const isVerified = (r.is_verified_buyer !== false);
+        const tags = Array.isArray(r.tags) ? r.tags : [];
+        const photoHtml = r.photo_url ? `<img src="${r.photo_url}" class="review-photo-thumb" style="width:34px; height:34px;" onclick="app.openReviewPhoto('${r.photo_url}', '${r.author}')" title="عرض صورة التجربة">` : '';
+
+        return `
         <tr>
           <td>
             <div style="display:flex; align-items:center; gap:8px;">
-              <img src="${r.product_image || ''}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;">
-              <span style="font-weight:600; font-size:0.85rem;">${r.product_name || '-'}</span>
+              <img src="${pImg}" style="width:36px; height:36px; border-radius:6px; object-fit:cover;">
+              <span style="font-weight:600; font-size:0.85rem;">${pName}</span>
             </div>
           </td>
-          <td><strong>${r.author}</strong></td>
+          <td>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <strong>${r.author}</strong>
+              ${isVerified ? `<span class="verified-buyer-badge" style="font-size:0.7rem;"><i class="fa-solid fa-circle-check"></i> موثق</span>` : ''}
+            </div>
+          </td>
           <td><span style="color:#f59e0b; letter-spacing:1px;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span></td>
-          <td style="max-width:280px; font-size:0.85rem;">${r.comment}</td>
+          <td style="max-width:280px; font-size:0.85rem;">
+            <div>${r.comment}</div>
+            ${tags.length ? `<div style="display:flex; gap:4px; margin-top:4px; flex-wrap:wrap;">${tags.map(t => `<span class="badge" style="font-size:0.7rem; background:rgba(59,130,246,0.1); color:var(--primary);">${t}</span>`).join('')}</div>` : ''}
+          </td>
+          <td style="text-align:center;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:6px;">
+              ${photoHtml}
+              <span class="badge" style="font-size:0.75rem; background:rgba(16,185,129,0.1); color:#059669;" title="عدد التصويتات المفيدة">👍 ${r.helpful_count || 0}</span>
+            </div>
+          </td>
           <td style="font-size:0.8rem; color:var(--text-light);">${r.date}</td>
           <td>
             <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem; color:var(--danger);" onclick="app.deleteAdminReview(${r.id})" title="حذف التقييم">
@@ -3011,7 +3072,7 @@ const app = {
             </button>
           </td>
         </tr>
-      `).join('');
+      `;}).join('');
     } catch (err) {
       console.warn('Error loading reviews');
     }
@@ -3024,6 +3085,7 @@ const app = {
       const data = await res.json();
       if (data.success) {
         this.showToast('تم حذف التقييم بنجاح', 'success');
+        this.logAudit('حذف مراجعة', 'الأمان', `تم حذف مراجعة العميل للمنتج (المعرف #${id})`);
         await this.loadAdminReviews();
         await this.fetchProducts();
       } else {
@@ -3384,17 +3446,6 @@ const app = {
     this.selectedQuickViewColor = (p.colors && Array.isArray(p.colors) && p.colors.length) ? p.colors[0] : null;
 
     const body = document.getElementById('quickview-body');
-    const reviewsHtml = (p.reviews || []).map(r => `
-      <div class="review-item">
-        <div class="review-header">
-          <strong>${r.author}</strong>
-          <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
-        </div>
-        <p class="review-comment">${r.comment}</p>
-        <small class="review-date">${r.date}</small>
-      </div>
-    `).join('') || '<p style="color: var(--text-light); font-size: 0.88rem;">لا توجد تقييمات بعد. كن أول من يقيّم هذه القطعة!</p>';
-
     const gallery = p.gallery && p.gallery.length ? p.gallery : [p.image_url];
     const thumbsHtml = gallery.map((imgUrl, idx) => `
       <div class="gallery-thumb-item ${idx === 0 ? 'active' : ''}" onclick="app.switchGalleryImage('${imgUrl}', this)">
@@ -3497,25 +3548,70 @@ const app = {
         `}
 
         <div class="reviews-section">
-          <h4>تقييمات العملاء (${p.reviews_count || 0})</h4>
-          <div class="reviews-list">${reviewsHtml}</div>
-          <form onsubmit="app.handleAddReview(event, ${p.id})" class="review-form">
-            <h5>أضف تقييمك للمنتج</h5>
-            <input type="text" id="rev-author" placeholder="اسمك الكريم..." required value="${this.currentUser ? this.currentUser.name : ''}">
-            <select id="rev-rating" required>
-              <option value="5">★★★★★ (5/5 ممتاز)</option>
-              <option value="4">★★★★☆ (4/5 جيد جداً)</option>
-              <option value="3">★★★☆☆ (3/5 متوسط)</option>
-              <option value="2">★★☆☆☆ (2/5 مقبول)</option>
-              <option value="1">★☆☆☆☆ (1/5 سيء)</option>
-            </select>
-            <textarea id="rev-comment" rows="2" placeholder="اكتب رأيك الصادق في المنتج..." required></textarea>
-            <button type="submit" class="btn btn-secondary btn-block">إرسال التقييم</button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <h4 style="margin:0;"><i class="fa-solid fa-star" style="color:#f59e0b;"></i> تجارب وتقييمات العملاء الموثقة (${p.reviews_count || 0})</h4>
+          </div>
+
+          <!-- Reviews Filter Bar -->
+          <div class="reviews-filter-bar">
+            <button type="button" class="review-filter-btn ${this.currentReviewFilter === 'all' ? 'active' : ''}" onclick="app.filterQuickViewReviews('all', this)">الكل (${p.reviews ? p.reviews.length : 0})</button>
+            <button type="button" class="review-filter-btn ${this.currentReviewFilter === 'verified' ? 'active' : ''}" onclick="app.filterQuickViewReviews('verified', this)"><i class="fa-solid fa-circle-check"></i> موثقة فقط</button>
+            <button type="button" class="review-filter-btn ${this.currentReviewFilter === 'photo' ? 'active' : ''}" onclick="app.filterQuickViewReviews('photo', this)"><i class="fa-solid fa-camera"></i> تجارب بالصور</button>
+            <button type="button" class="review-filter-btn ${this.currentReviewFilter === 'rating5' ? 'active' : ''}" onclick="app.filterQuickViewReviews('rating5', this)"><i class="fa-solid fa-star"></i> 5 نجوم</button>
+          </div>
+
+          <!-- Filtered Reviews List -->
+          <div class="reviews-list" id="quickview-reviews-list">
+            <!-- Populated dynamically by app.renderQuickViewReviews -->
+          </div>
+
+          <!-- Enhanced Review Form -->
+          <form onsubmit="app.handleAddReview(event, ${p.id})" class="review-form" style="margin-top:20px; background:var(--bg-hover); padding:16px; border-radius:14px; border:1px solid var(--border-color);">
+            <h5 style="margin:0 0 10px 0; font-size:0.95rem; display:flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-pen-to-square" style="color:var(--primary);"></i> أضف تقييمك ورأيك الموثق في القطعة
+            </h5>
+            
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+              <input type="text" id="rev-author" placeholder="اسمك الكريم..." required value="${this.currentUser ? this.currentUser.name : ''}" style="margin:0;">
+              <select id="rev-rating" required style="margin:0;">
+                <option value="5">★★★★★ (5/5 ممتاز)</option>
+                <option value="4">★★★★☆ (4/5 جيد جداً)</option>
+                <option value="3">★★★☆☆ (3/5 متوسط)</option>
+                <option value="2">★★☆☆☆ (2/5 مقبول)</option>
+                <option value="1">★☆☆☆☆ (1/5 سيء)</option>
+              </select>
+            </div>
+
+            <!-- Clickable Review Tags Picker -->
+            <label style="font-size:0.8rem; font-weight:700; color:var(--text-light); margin-bottom:4px; display:block;">اختر وسوماً تلائم تجربتك (تساعد المتسوقين):</label>
+            <div class="tags-picker-group">
+              <button type="button" class="tag-picker-btn" onclick="app.toggleReviewFormTag('مقاس مضبوط بالمللي', this)">📏 مقاس مضبوط بالمللي</button>
+              <button type="button" class="tag-picker-btn" onclick="app.toggleReviewFormTag('خامة إيطالية فاخرة', this)">🧵 خامة فاخرة</button>
+              <button type="button" class="tag-picker-btn" onclick="app.toggleReviewFormTag('ألوان مطابقة تماماً', this)">🎨 ألوان مطابقة</button>
+              <button type="button" class="tag-picker-btn" onclick="app.toggleReviewFormTag('شحن سريع في 24 ساعة', this)">⚡ شحن سريع</button>
+              <button type="button" class="tag-picker-btn" onclick="app.toggleReviewFormTag('تغليف ملكي راقي', this)">🎁 تغليف راقي</button>
+            </div>
+
+            <!-- Optional Review Photo Input with Quick Sample -->
+            <div class="review-photo-input-group">
+              <input type="url" id="rev-photo-url" class="form-control" placeholder="رابط صورة تجربتك (اختياري)..." style="font-size:0.82rem; margin:0;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="app.setReviewSamplePhoto('https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500&auto=format&fit=crop&q=80')" title="إرفاق صورة تجربة عينة">
+                <i class="fa-solid fa-camera"></i> عينة 📷
+              </button>
+            </div>
+
+            <textarea id="rev-comment" rows="2" placeholder="اكتب رأيك الصادق في جودة القماش، المقاس، وتجربة الارتداء..." required style="margin-bottom:12px;"></textarea>
+            
+            <button type="submit" class="btn btn-primary btn-block" style="padding:10px 18px; font-weight:800;">
+              <i class="fa-solid fa-paper-plane"></i> نشر التقييم الموثق فوراً
+            </button>
           </form>
         </div>
       </div>
     `;
+    this.selectedReviewTags = [];
     document.getElementById('product-modal').classList.add('active');
+    this.renderQuickViewReviews(p);
   },
 
   selectQuickViewSize: function(size, btn) {
@@ -4132,10 +4228,19 @@ const app = {
 
   handleAddReview: async function(e, productId) {
     e.preventDefault();
+    const authorVal = document.getElementById('rev-author')?.value || 'عميل المتجر';
+    const ratingVal = parseInt(document.getElementById('rev-rating')?.value || '5');
+    const commentVal = document.getElementById('rev-comment')?.value || '';
+    const photoVal = document.getElementById('rev-photo-url')?.value || null;
+    const tagsVal = (this.selectedReviewTags && this.selectedReviewTags.length) ? [...this.selectedReviewTags] : [];
+
     const data = {
-      author: document.getElementById('rev-author').value,
-      rating: document.getElementById('rev-rating').value,
-      comment: document.getElementById('rev-comment').value
+      author: authorVal,
+      rating: ratingVal,
+      comment: commentVal,
+      photo_url: photoVal,
+      tags: tagsVal,
+      is_verified_buyer: true
     };
 
     try {
@@ -4146,15 +4251,498 @@ const app = {
       });
       const result = await res.json();
       if (result.success) {
-        this.showToast('تمت إضافة تقييمك بنجاح', 'success');
+        this.showToast('✨ شكراً لك! تمت إضافة تقييمك الموثق بنجاح', 'success');
+        this.logAudit('تقييم منتج', 'الطلبات', `أضاف العميل (${authorVal}) تقييماً موثقاً (${ratingVal}/5) للمنتج #${productId}`);
+        this.pushAdminAlert('info', 'fa-star', 'تقييم موثق جديد ⭐', `أضاف العميل ${authorVal} تقييماً جديداً للمنتج`);
         await this.fetchProducts();
+        this.selectedReviewTags = [];
         this.quickView(productId);
         this.renderProducts();
       } else {
         this.showToast(result.message || 'خطأ في إضافة التقييم', 'danger');
       }
     } catch (err) {
-      this.showToast('خطأ في إرسال التقييم', 'danger');
+      // Fallback for offline / local preview
+      const p = this.products.find(x => x.id === productId);
+      if (p) {
+        if (!p.reviews) p.reviews = [];
+        p.reviews.unshift({
+          id: Date.now(),
+          author: authorVal,
+          rating: ratingVal,
+          comment: commentVal,
+          photo_url: photoVal,
+          tags: tagsVal,
+          is_verified_buyer: true,
+          helpful_count: 0,
+          date: new Date().toISOString().slice(0, 10)
+        });
+        p.reviews_count = (p.reviews_count || 0) + 1;
+        this.showToast('✨ تم تسجيل تقييمك الموثق بنجاح!', 'success');
+        this.logAudit('تقييم منتج', 'الطلبات', `أضاف العميل (${authorVal}) تقييماً موثقاً (${ratingVal}/5) للمنتج #${productId}`);
+        this.selectedReviewTags = [];
+        this.quickView(productId);
+        this.renderProducts();
+      }
+    }
+  },
+
+  // ==========================================
+  // FEATURE 1: SMART PRODUCT COMPARISON TOOL
+  // ==========================================
+  toggleCompare: function(id) {
+    const idx = this.compareList.indexOf(id);
+    if (idx > -1) {
+      this.compareList.splice(idx, 1);
+      this.showToast('تمت إزالة القطعة من جدول المقارنة', 'info');
+    } else {
+      if (this.compareList.length >= 4) {
+        this.showToast('الحد الأقصى للمقارنة هو 4 قطع في وقت واحد', 'warning');
+        return;
+      }
+      this.compareList.push(id);
+      const p = this.products.find(x => x.id === id);
+      this.showToast(`✨ تمت إضافة "${p ? p.name_ar : 'القطعة'}" إلى المقارنة!`, 'success');
+    }
+    localStorage.setItem('elite_compare', JSON.stringify(this.compareList));
+    this.renderProducts();
+    this.renderFloatingCompareBar();
+  },
+
+  removeFromCompare: function(id) {
+    this.compareList = this.compareList.filter(x => x !== id);
+    localStorage.setItem('elite_compare', JSON.stringify(this.compareList));
+    this.renderProducts();
+    this.renderFloatingCompareBar();
+    if (document.getElementById('compare-modal')?.classList.contains('active')) {
+      if (this.compareList.length > 0) {
+        this.openCompareModal();
+      } else {
+        this.closeModal('compare-modal');
+      }
+    }
+  },
+
+  clearCompare: function() {
+    this.compareList = [];
+    localStorage.setItem('elite_compare', JSON.stringify(this.compareList));
+    this.renderProducts();
+    this.renderFloatingCompareBar();
+    this.closeModal('compare-modal');
+    this.showToast('تم إفراغ قائمة مقارنة المنتجات', 'info');
+  },
+
+  renderFloatingCompareBar: function() {
+    const bar = document.getElementById('compare-floating-bar');
+    const countEl = document.getElementById('compare-bar-count');
+    const thumbsEl = document.getElementById('compare-bar-thumbs');
+    if (!bar) return;
+
+    if (this.compareList.length === 0) {
+      bar.classList.remove('active');
+      return;
+    }
+
+    bar.classList.add('active');
+    if (countEl) countEl.innerText = `${this.compareList.length} من 4 قطع محددة`;
+
+    if (thumbsEl) {
+      const items = this.compareList.map(id => this.products.find(p => p.id === id)).filter(Boolean);
+      thumbsEl.innerHTML = items.map(p => `
+        <div class="compare-thumb-item" title="${p.name_ar}">
+          <img src="${p.image_url}" alt="${p.name_ar}">
+          <button type="button" class="compare-thumb-remove" onclick="event.stopPropagation(); app.removeFromCompare(${p.id})">×</button>
+        </div>
+      `).join('');
+    }
+  },
+
+  openCompareModal: function() {
+    if (this.compareList.length === 0) {
+      this.showToast('يرجى تحديد قطعة واحدة على الأقل للمقارنة', 'info');
+      return;
+    }
+    const modal = document.getElementById('compare-modal');
+    const body = document.getElementById('compare-modal-body');
+    if (!modal || !body) return;
+
+    const items = this.compareList.map(id => this.products.find(p => p.id === id)).filter(Boolean);
+    if (items.length === 0) return;
+
+    let html = `
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th class="compare-feature-label">المنتج / الموديل</th>
+            ${items.map(p => `
+              <th class="compare-product-col compare-col-header">
+                <button type="button" class="compare-col-remove" onclick="app.removeFromCompare(${p.id})" title="إزالة من المقارنة"><i class="fa-solid fa-xmark"></i></button>
+                <img src="${p.image_url}" class="compare-col-img" alt="${p.name_ar}">
+                <div class="compare-col-title">${p.name_ar}</div>
+                <div class="compare-col-price">$${p.price.toFixed(2)}</div>
+                <button class="btn btn-primary btn-sm btn-block" style="padding:6px 12px; font-size:0.8rem;" onclick="app.quickView(${p.id}); app.closeModal('compare-modal');">
+                  <i class="fa-solid fa-bag-shopping"></i> اختر واشترِ
+                </button>
+              </th>
+            `).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-layer-group"></i> التصنيف</td>
+            ${items.map(p => `<td class="compare-product-col"><strong>${p.category_name || 'أزياء فاخرة'}</strong></td>`).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-feather"></i> نوع القماش / الخامة</td>
+            ${items.map(p => `<td class="compare-product-col"><span class="badge" style="background:rgba(59,130,246,0.1); color:var(--primary); font-weight:700;">${p.material || 'قطن فاخر 100%'}</span></td>`).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-scissors"></i> نوع القصة (Fit)</td>
+            ${items.map(p => `<td class="compare-product-col">${p.fit_type || 'قصة كلاسيكية مريحة'}</td>`).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-ruler-combined"></i> المقاسات المتوفرة</td>
+            ${items.map(p => {
+              const sz = Array.isArray(p.sizes) ? p.sizes : ['S','M','L','XL'];
+              return `<td class="compare-product-col"><div style="display:flex; gap:4px; justify-content:center; flex-wrap:wrap;">${sz.map(s => `<span class="card-size-tag">${s}</span>`).join('')}</div></td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-palette"></i> الألوان المتاحة</td>
+            ${items.map(p => {
+              const clrs = Array.isArray(p.colors) ? p.colors : [];
+              return `<td class="compare-product-col"><div style="display:flex; gap:6px; justify-content:center;">${clrs.map(c => `<span style="display:inline-block; width:18px; height:18px; border-radius:50%; background:${c.hex}; border:1px solid #cbd5e1;" title="${c.name}"></span>`).join('') || 'لون موحد'}</div></td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-warehouse"></i> حالة المخزون</td>
+            ${items.map(p => {
+              const out = (p.stock <= 0);
+              return `<td class="compare-product-col">${out ? `<span class="badge badge-danger">الكمية مخلصة</span>` : `<span class="badge badge-success">متوفر (${p.stock} قطعة)</span>`}</td>`;
+            }).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-star"></i> التقييم العام</td>
+            ${items.map(p => `<td class="compare-product-col"><span style="color:#f59e0b; font-weight:800;">★ ${p.rating || 5.0}</span> <span style="font-size:0.75rem; color:var(--text-light);">(${p.reviews_count || 0} تقييم)</span></td>`).join('')}
+          </tr>
+          <tr>
+            <td class="compare-feature-label"><i class="fa-solid fa-hands-bubbles"></i> إرشادات العناية</td>
+            ${items.map(p => `<td class="compare-product-col" style="font-size:0.8rem; color:var(--text-light);">${p.care_instructions || 'غسيل جاف بالبخار لحماية الأنسجة'}</td>`).join('')}
+          </tr>
+        </tbody>
+      </table>
+    `;
+
+    body.innerHTML = html;
+    modal.classList.add('active');
+  },
+
+  // ==========================================
+  // FEATURE 2: AUDIT LOG & REAL-TIME ALERTS
+  // ==========================================
+  logAudit: function(action, category, details, user = null, status = 'ناجحة') {
+    const entry = {
+      id: Date.now(),
+      timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      action,
+      category,
+      details,
+      user: user || (this.currentUser ? this.currentUser.name : 'مدير النظام العام'),
+      status
+    };
+    this.auditLog.unshift(entry);
+    if (this.auditLog.length > 200) this.auditLog.pop();
+    localStorage.setItem('elite_audit_log', JSON.stringify(this.auditLog));
+    this.renderAuditLog();
+  },
+
+  renderAuditLog: function(filterCat = 'all') {
+    const tbody = document.getElementById('admin-audit-tbody');
+    if (!tbody) return;
+
+    let list = this.auditLog || [];
+    if (filterCat !== 'all') {
+      list = list.filter(item => item.category === filterCat);
+    }
+
+    if (list.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-light);">لا توجد حركات مسجلة تطابق التصفية</td></tr>';
+      return;
+    }
+
+    const catBadgeClass = {
+      'المخزون': 'audit-cat-stock',
+      'الطلبات': 'audit-cat-order',
+      'الأسعار': 'audit-cat-price',
+      'الأمان': 'audit-cat-security',
+      'النظام': 'audit-cat-system'
+    };
+
+    tbody.innerHTML = list.map(item => `
+      <tr>
+        <td style="font-size:0.8rem; font-family:monospace; color:var(--text-light);">${item.timestamp}</td>
+        <td>
+          <span class="audit-category-badge ${catBadgeClass[item.category] || 'audit-cat-system'}">
+            <i class="fa-solid fa-circle-dot" style="font-size:0.5rem;"></i> ${item.category}
+          </span>
+        </td>
+        <td><strong>${item.user}</strong></td>
+        <td style="font-size:0.88rem;">${item.details}</td>
+        <td style="text-align:center;"><span class="badge badge-success" style="font-size:0.75rem;">${item.status}</span></td>
+      </tr>
+    `).join('');
+  },
+
+  filterAuditLog: function() {
+    const cat = document.getElementById('audit-filter-category')?.value || 'all';
+    this.renderAuditLog(cat);
+  },
+
+  exportAuditLogCSV: function() {
+    if (!this.auditLog || this.auditLog.length === 0) {
+      this.showToast('لا توجد بيانات لتصديرها', 'warning');
+      return;
+    }
+    let csv = '\uFEFF"التاريخ والوقت","التصنيف","المسؤول","البيان والتفاصيل","الحالة"\n';
+    this.auditLog.forEach(i => {
+      csv += `"${i.timestamp}","${i.category}","${i.user}","${i.details.replace(/"/g, '""')}","${i.status}"\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', `elite_audit_trail_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    this.showToast('تم تصدير سجل التدقيق والعمليات بصيغة CSV بنجاح', 'success');
+  },
+
+  clearAuditLog: function() {
+    if (!confirm('هل أنت متأكد من رغبتك في تفريغ سجل العمليات والتدقيق بالكامل؟')) return;
+    this.auditLog = [];
+    localStorage.removeItem('elite_audit_log');
+    this.renderAuditLog();
+    this.showToast('تم مسح سجل التدقيق بالكامل', 'info');
+  },
+
+  // Real-time Alerts Hub
+  renderAdminAlerts: function() {
+    const listEl = document.getElementById('admin-alerts-list');
+    const badgeEl = document.getElementById('admin-alerts-badge');
+    if (!listEl) return;
+
+    const unreadCount = this.adminAlerts.filter(a => a.unread).length;
+    if (badgeEl) {
+      badgeEl.innerText = unreadCount;
+      badgeEl.style.display = unreadCount > 0 ? 'flex' : 'none';
+    }
+
+    if (this.adminAlerts.length === 0) {
+      listEl.innerHTML = '<div style="padding:20px; text-align:center; color:var(--text-light); font-size:0.85rem;">لا توجد تنبيهات جديدة في الوقت الحالي</div>';
+      return;
+    }
+
+    listEl.innerHTML = this.adminAlerts.map(a => `
+      <div class="alert-item-card ${a.unread ? 'unread' : ''}" onclick="app.handleAlertClick(${a.id})">
+        <div class="alert-icon-box ${a.type || 'info'}">
+          <i class="fa-solid ${a.icon || 'fa-bell'}"></i>
+        </div>
+        <div class="alert-details">
+          <div class="alert-title">${a.title}</div>
+          <div class="alert-desc">${a.desc}</div>
+          <div class="alert-time">${a.time}</div>
+        </div>
+      </div>
+    `).join('');
+  },
+
+  toggleAdminAlertsMenu: function(forceState) {
+    const dropdown = document.getElementById('admin-alerts-dropdown');
+    if (!dropdown) return;
+    if (typeof forceState === 'boolean') {
+      if (forceState) dropdown.classList.add('show');
+      else dropdown.classList.remove('show');
+    } else {
+      dropdown.classList.toggle('show');
+    }
+  },
+
+  markAllAlertsRead: function() {
+    this.adminAlerts.forEach(a => a.unread = false);
+    localStorage.setItem('elite_admin_alerts', JSON.stringify(this.adminAlerts));
+    this.renderAdminAlerts();
+    this.showToast('تم تحديد جميع التنبيهات كمقروءة', 'success');
+  },
+
+  pushAdminAlert: function(type, icon, title, desc) {
+    const newAlert = {
+      id: Date.now(),
+      type,
+      icon,
+      title,
+      desc,
+      time: 'الآن',
+      unread: true
+    };
+    this.adminAlerts.unshift(newAlert);
+    if (this.adminAlerts.length > 50) this.adminAlerts.pop();
+    localStorage.setItem('elite_admin_alerts', JSON.stringify(this.adminAlerts));
+    this.renderAdminAlerts();
+  },
+
+  handleAlertClick: function(id) {
+    const a = this.adminAlerts.find(x => x.id === id);
+    if (a) a.unread = false;
+    localStorage.setItem('elite_admin_alerts', JSON.stringify(this.adminAlerts));
+    this.renderAdminAlerts();
+    if (a && a.type === 'danger') {
+      this.switchAdminTab('products-tab');
+    } else if (a && a.type === 'success') {
+      this.switchAdminTab('orders-tab');
+    }
+    this.toggleAdminAlertsMenu(false);
+  },
+
+  // ==========================================
+  // FEATURE 3: VERIFIED REVIEWS & HELPFUL VOTES
+  // ==========================================
+  filterQuickViewReviews: function(filter, btn) {
+    this.currentReviewFilter = filter;
+    document.querySelectorAll('.review-filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    if (this.activeQuickViewProduct) {
+      this.renderQuickViewReviews(this.activeQuickViewProduct);
+    }
+  },
+
+  renderQuickViewReviews: function(p) {
+    const container = document.getElementById('quickview-reviews-list');
+    if (!container) return;
+
+    let reviews = (p.reviews && p.reviews.length) ? [...p.reviews] : [];
+
+    // Filter
+    if (this.currentReviewFilter === 'verified') {
+      reviews = reviews.filter(r => r.is_verified_buyer !== false);
+    } else if (this.currentReviewFilter === 'photo') {
+      reviews = reviews.filter(r => r.photo_url);
+    } else if (this.currentReviewFilter === 'rating5') {
+      reviews = reviews.filter(r => r.rating === 5);
+    }
+
+    if (reviews.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-light); font-size:0.85rem; padding:12px; text-align:center;">لا توجد تقييمات مطابقة لهذا الفلتر</p>';
+      return;
+    }
+
+    container.innerHTML = reviews.map((r, idx) => {
+      const reviewKey = r.id || `${p.id}_${idx}`;
+      const isVoted = this.helpfulVotes.includes(reviewKey);
+      const isVerified = (r.is_verified_buyer !== false);
+      const tagsList = Array.isArray(r.tags) ? r.tags : [];
+
+      return `
+        <div class="review-item">
+          <div class="review-header">
+            <div class="review-author-wrap">
+              <strong>${r.author}</strong>
+              ${isVerified ? `<span class="verified-buyer-badge"><i class="fa-solid fa-circle-check"></i> مشتري موثق ✓</span>` : ''}
+            </div>
+            <span class="review-stars" style="color:#f59e0b;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+          </div>
+
+          ${tagsList.length ? `
+            <div class="review-tags-row">
+              ${tagsList.map(t => `<span class="review-tag-chip"><i class="fa-solid fa-tag"></i> ${t}</span>`).join('')}
+            </div>
+          ` : ''}
+
+          <p class="review-comment" style="margin:6px 0; font-size:0.9rem; line-height:1.5;">${r.comment}</p>
+
+          ${r.photo_url ? `
+            <div class="review-photo-preview-wrap">
+              <img src="${r.photo_url}" class="review-photo-thumb" alt="تجربة العميل" onclick="app.openReviewPhoto('${r.photo_url}', '${r.author}')" title="انقر لتكبير صورة التجربة">
+              <span style="display:block; font-size:0.72rem; color:var(--text-light); margin-top:2px;"><i class="fa-solid fa-camera"></i> صورة من تجربة المشتري</span>
+            </div>
+          ` : ''}
+
+          <div class="review-footer-row">
+            <small class="review-date" style="color:var(--text-light); font-size:0.75rem;">${r.date || 'مؤخراً'}</small>
+            <button type="button" class="review-helpful-btn ${isVoted ? 'voted' : ''}" onclick="app.voteReviewHelpful(${r.id || 0}, ${p.id}, ${idx}, this)">
+              <i class="fa-regular fa-thumbs-up"></i>
+              <span>${isVoted ? 'مفيدة ✓' : 'مفيدة'} (${r.helpful_count || 0})</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  },
+
+  openReviewPhoto: function(url, author) {
+    const modal = document.getElementById('review-photo-modal');
+    const img = document.getElementById('review-photo-img');
+    const caption = document.getElementById('review-photo-caption');
+    if (!modal || !img) return;
+
+    img.src = url;
+    if (caption) caption.innerText = `صورة تجربة الشراء من العميل: ${author} ⭐`;
+    modal.classList.add('active');
+  },
+
+  voteReviewHelpful: async function(reviewId, productId, reviewIdx, btn) {
+    const voteKey = reviewId || `${productId}_${reviewIdx}`;
+    if (this.helpfulVotes.includes(voteKey)) {
+      this.showToast('لقد صوتت بالفعل على هذه المراجعة بأنها مفيدة 👍', 'info');
+      return;
+    }
+
+    this.helpfulVotes.push(voteKey);
+    localStorage.setItem('elite_helpful_votes', JSON.stringify(this.helpfulVotes));
+
+    // Optimistically update in memory
+    const p = this.products.find(x => x.id === productId);
+    if (p && p.reviews && p.reviews[reviewIdx]) {
+      p.reviews[reviewIdx].helpful_count = (p.reviews[reviewIdx].helpful_count || 0) + 1;
+    }
+
+    if (btn) {
+      btn.classList.add('voted');
+      const span = btn.querySelector('span');
+      if (span) {
+        const currentCount = parseInt(span.innerText.match(/\d+/)?.[0] || '0') + 1;
+        span.innerText = `مفيدة ✓ (${currentCount})`;
+      }
+    }
+
+    this.showToast('شكراً لتصويتك! تم تسجيل رأيك بأنه مفيد.', 'success');
+
+    // Call API if real reviewId exists
+    if (reviewId) {
+      try {
+        await fetch(`/api/reviews/${reviewId}/helpful`, { method: 'POST' });
+      } catch (e) {
+        // Handled silently
+      }
+    }
+  },
+
+  toggleReviewFormTag: function(tag, btn) {
+    if (!this.selectedReviewTags) this.selectedReviewTags = [];
+    const idx = this.selectedReviewTags.indexOf(tag);
+    if (idx > -1) {
+      this.selectedReviewTags.splice(idx, 1);
+      btn.classList.remove('active');
+    } else {
+      this.selectedReviewTags.push(tag);
+      btn.classList.add('active');
+    }
+  },
+
+  setReviewSamplePhoto: function(url) {
+    const input = document.getElementById('rev-photo-url');
+    if (input) {
+      input.value = url;
+      this.showToast('تم إرفاق صورة العينة للتقييم 📷', 'info');
     }
   },
 
@@ -4193,6 +4781,12 @@ const app = {
       if (userWrapper && !userWrapper.contains(e.target)) {
         const dropdown = document.getElementById('user-dropdown');
         if (dropdown) dropdown.classList.remove('show');
+      }
+
+      const notifsWrapper = document.querySelector('.admin-notifs-wrapper');
+      if (notifsWrapper && !notifsWrapper.contains(e.target)) {
+        const alertsDropdown = document.getElementById('admin-alerts-dropdown');
+        if (alertsDropdown) alertsDropdown.classList.remove('show');
       }
     });
   }

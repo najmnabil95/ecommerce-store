@@ -14,7 +14,18 @@ class Review extends Model
         'author',
         'rating',
         'comment',
+        'photo_url',
+        'is_verified_buyer',
+        'helpful_count',
+        'tags',
         'date',
+    ];
+
+    protected $casts = [
+        'is_verified_buyer' => 'boolean',
+        'helpful_count' => 'integer',
+        'tags' => 'array',
+        'rating' => 'integer',
     ];
 
     public function product()

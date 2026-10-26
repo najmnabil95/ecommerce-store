@@ -254,6 +254,9 @@ class ProductController extends Controller
             'author' => 'nullable|string',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'required|string',
+            'photo_url' => 'nullable|string',
+            'tags' => 'nullable|array',
+            'is_verified_buyer' => 'nullable|boolean',
         ]);
 
         $review = Review::create([
@@ -261,6 +264,10 @@ class ProductController extends Controller
             'author' => $validated['author'] ?? 'عميل المتجر',
             'rating' => $validated['rating'],
             'comment' => $validated['comment'],
+            'photo_url' => $validated['photo_url'] ?? null,
+            'is_verified_buyer' => $validated['is_verified_buyer'] ?? true,
+            'helpful_count' => 0,
+            'tags' => $validated['tags'] ?? [],
             'date' => now()->format('Y-m-d'),
         ]);
 

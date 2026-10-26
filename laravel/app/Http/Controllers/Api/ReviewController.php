@@ -42,4 +42,16 @@ class ReviewController extends Controller
             'message' => 'تم حذف التقييم بنجاح وتحديث إحصائيات المنتج'
         ]);
     }
+
+    public function helpfulVote($id)
+    {
+        $review = Review::findOrFail($id);
+        $review->increment('helpful_count');
+
+        return response()->json([
+            'success' => true,
+            'helpful_count' => $review->helpful_count,
+            'message' => 'شكراً لتصويتك! تم تسجيل رأيك بأنه مفيد.'
+        ]);
+    }
 }
