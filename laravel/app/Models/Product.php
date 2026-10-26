@@ -39,6 +39,21 @@ class Product extends Model
         'colors' => 'array',
     ];
 
+    public function getImageAttribute()
+    {
+        return $this->image_url;
+    }
+
+    public function getOldPriceAttribute()
+    {
+        return $this->original_price;
+    }
+
+    public function getFabricAttribute()
+    {
+        return $this->material;
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

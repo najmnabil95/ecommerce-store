@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 
 class AdminViewController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request, $tab = 'overview-tab')
     {
         $productsCount = Product::count();
         $ordersCount = Order::count();
@@ -24,9 +24,9 @@ class AdminViewController extends Controller
         
         $totalSales = Order::whereIn('status', ['delivered', 'processing', 'shipped'])->sum('total');
         
-        $recentOrders = Order::orderBy('id', 'desc')->take(8)->get();
+        $recentOrders = Order::orderBy('id', 'desc')->take(15)->get();
         $lowStockProducts = Product::where('stock', '<=', 5)->get();
-        $recentReviews = Review::with('product')->orderBy('id', 'desc')->take(6)->get();
+        $recentReviews = Review::with('product')->orderBy('id', 'desc')->take(15)->get();
         $categories = Category::all();
         $products = Product::with('category')->orderBy('id', 'desc')->get();
         $coupons = Coupon::orderBy('id', 'desc')->get();
@@ -37,6 +37,8 @@ class AdminViewController extends Controller
         } catch (\Exception $e) {
             $dbVersion = 'MariaDB 10.4+';
         }
+
+        $activeTab = $tab;
 
         return view('admin.dashboard', compact(
             'productsCount',
@@ -51,41 +53,33 @@ class AdminViewController extends Controller
             'categories',
             'products',
             'coupons',
-            'dbVersion'
+            'dbVersion',
+            'activeTab'
         ));
     }
 
-    public function products()
+    public function products(Request $request)
     {
-        $products = Product::with('category')->orderBy('id', 'desc')->paginate(15);
-        $categories = Category::all();
-        return view('admin.products', compact('products', 'categories'));
+        return $this->dashboard($request, 'products-tab');
     }
 
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = Order::orderBy('id', 'desc')->paginate(15);
-        return view('admin.orders', compact('orders'));
+        return $this->dashboard($request, 'orders-tab');
     }
 
-    public function reviews()
+    public function reviews(Request $request)
     {
-        $reviews = Review::with('product')->orderBy('id', 'desc')->paginate(15);
-        return view('admin.reviews', compact('reviews'));
+        return $this->dashboard($request, 'reviews-tab');
     }
 
-    public function audit()
+    public function audit(Request $request)
     {
-        return view('admin.audit');
+        return $this->dashboard($request, 'audit-tab');
     }
 
-    public function database()
+    public function database(Request $request)
     {
-        try {
-            $tables = DB::select('SHOW TABLE STATUS');
-        } catch (\Exception $e) {
-            $tables = [];
-        }
-        return view('admin.database', compact('tables'));
+        return $this->dashboard($request, 'database-tab');
     }
 }
